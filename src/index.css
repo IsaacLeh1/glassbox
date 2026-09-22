@@ -1,0 +1,241 @@
+@import 'tailwindcss';
+
+/*
+  Glassbox design tokens.
+
+  The weight palette is deliberately blue-to-amber rather than red-to-green:
+  it is the clearest diverging pair for viewers with red-green colour blindness,
+  and it stays legible at very small sizes.
+*/
+
+:root {
+  --bg: #08090c;
+  --bg-2: #0d0f14;
+  --panel: #111318;
+  --panel-2: #161922;
+  --panel-3: #1c2029;
+  --border: #23272f;
+  --border-2: #2f3541;
+  --text: #e9ecf1;
+  --text-2: #a7aebb;
+  --text-3: #6f7784;
+  --accent: #38bdf8;
+  --accent-2: #0ea5e9;
+  --accent-dim: #0b3f56;
+  --neg: #4c7ef3;
+  --pos: #f59e0b;
+  --ok: #34d399;
+  --warn: #fbbf24;
+  --err: #f87171;
+  --grid: #191d25;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 8px 24px rgba(0, 0, 0, 0.35);
+  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+  --bg: #f7f8fa;
+  --bg-2: #ffffff;
+  --panel: #ffffff;
+  --panel-2: #f2f4f7;
+  --panel-3: #e8ebf0;
+  --border: #dde1e8;
+  --border-2: #c8cfda;
+  --text: #11141a;
+  --text-2: #4d5665;
+  --text-3: #7c8697;
+  --accent: #0284c7;
+  --accent-2: #0369a1;
+  --accent-dim: #d8eefb;
+  --neg: #3a63d0;
+  --pos: #d97706;
+  --ok: #059669;
+  --warn: #b45309;
+  --err: #dc2626;
+  --grid: #e6e9ef;
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 8px 24px rgba(16, 24, 40, 0.08);
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--accent);
+  color: #04121a;
+}
+
+/* ---------------------------------------------------------- scrollbars -- */
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-2);
+  border-radius: 6px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-3);
+  background-clip: padding-box;
+}
+
+/* ------------------------------------------------------------ utilities -- */
+
+.mono {
+  font-family: var(--mono);
+  font-variant-ligatures: none;
+  font-feature-settings: 'tnum' 1;
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.panel-2 {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.focus-ring:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--panel-3);
+  outline: none;
+}
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--bg);
+  cursor: grab;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+input[type='range']::-webkit-slider-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.12);
+}
+input[type='range']:disabled::-webkit-slider-thumb {
+  background: var(--text-3);
+  cursor: not-allowed;
+}
+
+select,
+input[type='text'],
+input[type='number'],
+input[type='password'],
+textarea {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 6px 9px;
+  font-family: inherit;
+  font-size: 13px;
+  width: 100%;
+}
+select:focus,
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+/* --------------------------------------------------------------- motion -- */
+
+@keyframes gb-fade {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.gb-fade {
+  animation: gb-fade 0.24s ease-out both;
+}
+
+@keyframes gb-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+.gb-pulse {
+  animation: gb-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes gb-flow {
+  to {
+    stroke-dashoffset: -14;
+  }
+}
+.gb-flow {
+  stroke-dasharray: 5 9;
+  animation: gb-flow 0.7s linear infinite;
+}
+
+@keyframes gb-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.gb-spin {
+  animation: gb-spin 0.9s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gb-fade,
+  .gb-pulse,
+  .gb-flow,
+  .gb-spin {
+    animation: none !important;
+  }
+}
