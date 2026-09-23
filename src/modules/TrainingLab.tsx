@@ -101,6 +101,60 @@ function TrainTab() {
   }, [trainer]);
 
   return (
+    <div className="space-y-4">
+      {/* Above the controls, not below them. A reader arriving from step 01
+          otherwise meets optimizer, schedule, regularisation and gradient
+          clipping before anything has said what training actually is. */}
+        <Panel title="What is happening on every step">
+          <Depth
+            plain={
+              <>
+                <p className="mb-2">
+                  Training is a loop of four moves, repeated thousands of times. Take a handful of examples.
+                  Run them through the network and see what it predicts. Compare that to the right answer and
+                  measure how wrong it was. Then work out, for every single weight, whether nudging it up or
+                  down would have made the answer better, and nudge all of them a tiny amount in the better
+                  direction.
+                </p>
+                <p>
+                  That is the whole algorithm. There is no insight and no understanding in it. The model
+                  improves because a few million tiny corrections in the right direction add up.
+                </p>
+              </>
+            }
+            math={
+              <>
+                <Eq note="One optimizer step, for a mini-batch B.">
+                  <div className="space-y-1">
+                    <div>ŷ = f(X<sub>B</sub>; θ)</div>
+                    <div>L = (1/|B|) Σ loss(ŷ<sub>i</sub>, y<sub>i</sub>) + λ‖θ‖²</div>
+                    <div>g = ∇<sub>θ</sub> L</div>
+                    <div>θ ← θ − η · g</div>
+                  </div>
+                </Eq>
+                <p>
+                  The current gradient has norm {fmt(last?.gradNorm ?? 0, 4)} and the step size <M>η</M> is{' '}
+                  {fmt(last?.lr ?? cfg.optim.lr, 4)}, so this update moved the parameter vector roughly{' '}
+                  {fmt((last?.gradNorm ?? 0) * (last?.lr ?? cfg.optim.lr), 5)} in parameter space. With{' '}
+                  {net.paramCount} parameters, that is a very small move in a very high-dimensional room.
+                </p>
+              </>
+            }
+            code={
+              <Code>{`// engine/trainer.ts -- one real training step
+const pass = this.net.forward(xb);           // predictions
+const g    = this.net.backward(pass, yb);    // every dL/dw
+const { norm } = this.opt.clip(groups);      // optional safety cap
+this.opt.cfg.lr = baseLr * lrScale(this.cfg.schedule, this.step, this.totalSteps);
+this.opt.tick();
+for (let l = 0; l < this.net.layerCount; l++) {
+  this.opt.step(\`W\${l}\`, this.net.W[l].data, g.dW[l].data);
+  this.opt.step(\`b\${l}\`, this.net.b[l],       g.db[l]);
+}`}</Code>
+            }
+          />
+        </Panel>
+
     <div className="grid gap-4 xl:grid-cols-[300px_minmax(0,1fr)]">
       {/* ------------------------------------------------------- controls */}
       <div className="space-y-4">
@@ -311,56 +365,8 @@ function TrainTab() {
           </Panel>
         </div>
 
-        <Panel title="What is happening on every step">
-          <Depth
-            plain={
-              <>
-                <p className="mb-2">
-                  Training is a loop of four moves, repeated thousands of times. Take a handful of examples.
-                  Run them through the network and see what it predicts. Compare that to the right answer and
-                  measure how wrong it was. Then work out, for every single weight, whether nudging it up or
-                  down would have made the answer better, and nudge all of them a tiny amount in the better
-                  direction.
-                </p>
-                <p>
-                  That is the whole algorithm. There is no insight and no understanding in it. The model
-                  improves because a few million tiny corrections in the right direction add up.
-                </p>
-              </>
-            }
-            math={
-              <>
-                <Eq note="One optimizer step, for a mini-batch B.">
-                  <div className="space-y-1">
-                    <div>ŷ = f(X<sub>B</sub>; θ)</div>
-                    <div>L = (1/|B|) Σ loss(ŷ<sub>i</sub>, y<sub>i</sub>) + λ‖θ‖²</div>
-                    <div>g = ∇<sub>θ</sub> L</div>
-                    <div>θ ← θ − η · g</div>
-                  </div>
-                </Eq>
-                <p>
-                  The current gradient has norm {fmt(last?.gradNorm ?? 0, 4)} and the step size <M>η</M> is{' '}
-                  {fmt(last?.lr ?? cfg.optim.lr, 4)}, so this update moved the parameter vector roughly{' '}
-                  {fmt((last?.gradNorm ?? 0) * (last?.lr ?? cfg.optim.lr), 5)} in parameter space. With{' '}
-                  {net.paramCount} parameters, that is a very small move in a very high-dimensional room.
-                </p>
-              </>
-            }
-            code={
-              <Code>{`// engine/trainer.ts -- one real training step
-const pass = this.net.forward(xb);           // predictions
-const g    = this.net.backward(pass, yb);    // every dL/dw
-const { norm } = this.opt.clip(groups);      // optional safety cap
-this.opt.cfg.lr = baseLr * lrScale(this.cfg.schedule, this.step, this.totalSteps);
-this.opt.tick();
-for (let l = 0; l < this.net.layerCount; l++) {
-  this.opt.step(\`W\${l}\`, this.net.W[l].data, g.dW[l].data);
-  this.opt.step(\`b\${l}\`, this.net.b[l],       g.db[l]);
-}`}</Code>
-            }
-          />
-        </Panel>
       </div>
+    </div>
     </div>
   );
 }

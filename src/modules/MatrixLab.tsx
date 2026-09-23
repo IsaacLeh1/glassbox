@@ -286,14 +286,28 @@ function ByHandTab() {
               plain={
                 <>
                   <p className="mb-2">
-                    A matrix is a grid of numbers, and multiplying two of them is one rule repeated: slide a row
-                    across a column, multiply the pairs you meet, add the results. That single number goes in
-                    one cell of the answer.
+                    In step 01 one neuron took two inputs, multiplied each by its own weight and added them
+                    up. A real layer has hundreds of neurons, all doing that to the same inputs at the same
+                    time. Writing out hundreds of separate sums would be unreadable, so they are stacked
+                    into a grid and done in one go. That grid is a matrix, and doing them all at once is a
+                    matrix multiply. Nothing new is happening &mdash; it is the umbrella calculation,
+                    several hundred times over, written down compactly.
+                  </p>
+                  <p className="mb-2">
+                    The rule is one thing repeated: slide a row across a column, multiply the pairs you
+                    meet, add the results. That single number goes in one cell of the answer. Each row of
+                    the left matrix is one thing being described; each column of the right one is one
+                    question being asked of it; and the cell where they cross is the answer to that
+                    question about that thing.
                   </p>
                   <p>
-                    The reason this matters for AI is that neural networks are almost nothing but this. The
-                    inner dimensions have to agree, which is why so much of the work of building a model is
-                    making sure shapes line up. Get one wrong and nothing runs at all.
+                    This is worth dwelling on because it is very nearly all a neural network does. Not
+                    mostly &mdash; nearly all. A frontier model is a few dozen of these in a row, with a
+                    squashing function between them, run over and over. The reason AI needed graphics cards
+                    to happen at all is that a graphics card is a machine built to do exactly this operation
+                    thousands of times in parallel, and it turned out that grids of numbers being multiplied
+                    for a video game and grids of numbers being multiplied for a language model are the same
+                    problem.
                   </p>
                 </>
               }

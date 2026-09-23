@@ -677,6 +677,69 @@ export const V = {
     down: 'Cheap retraining lets you refresh often, which is why teams invest so heavily in making the pipeline push-button.',
     note: 'A new model has not been through the evaluation the old one passed. That risk is part of the cost even though it does not appear on an invoice.',
   },
+
+  /* ------------------------------------- step 07: the lab programme -- */
+
+  labPurpose: {
+    what: 'One sentence on what this model is for. Written before any data is collected, because every decision after it is judged against this.',
+    up: 'A specific purpose makes every later choice easier and the evaluation obvious. "Continue a sentence in the style of the corpus" can be tested; "be good at language" cannot.',
+    down: 'A vague purpose feels safer and costs you at every gate, because nothing downstream has anything to be measured against.',
+    note: 'At a real lab this document is short, signed, and referred back to constantly. It is the thing that stops a programme drifting into whatever was interesting that month.',
+  },
+  labUsers: {
+    what: 'Who is going to use the model. Not a market, particular people with a particular task.',
+    up: 'Naming them narrows the problem, which is almost always what makes it solvable.',
+    down: 'Leaving it open means you are building for nobody in particular, and the evaluation ends up measuring whatever was easy to measure.',
+    note: 'The commonest way a model programme fails is not technical. It is producing something that works and that nobody needed.',
+  },
+  labSuccess: {
+    what: 'What would count as this model working. The bar, written before there is any number to look at.',
+    up: 'A demanding definition is a stronger claim and more likely to stop you at the evaluation gate, which is the gate doing its job.',
+    down: 'An easy definition sails through and proves nothing. A bar below what a lookup table already achieves is worse than no bar.',
+    note: 'This is the same discipline as step 10, applied at the point it actually matters: before the work starts rather than after.',
+  },
+  labCorpus: {
+    what: 'Which body of text to build the model from. The held-out tenth is separated before anything else happens, so the contamination check has something honest to check against.',
+    up: 'Not an ordering. Each corpus has a different structure, and the data report below will show you how repetitive each one is.',
+    down: 'Whichever you pick, look at the duplicate counts before moving on. Text that looks clean usually is not.',
+    note: 'Real data work is mostly this: acquiring text, then discovering what is wrong with it.',
+  },
+  labLicence: {
+    what: 'What you are actually allowed to do with this text. At a real company this is a lawyer’s sign-off, not an engineer’s judgement.',
+    up: 'A permissive licence clears the gate. Research-only is fine until somebody wants to sell access to the result.',
+    down: 'Unknown or proprietary blocks the programme here, and that is the correct behaviour rather than an obstacle.',
+    note: 'Training data provenance is now one of the most consequential legal questions in the field, and "we did not check" has stopped being an acceptable answer.',
+  },
+  labBudget: {
+    what: 'How much compute you are willing to spend on the run, in floating-point operations. This one number decides both how big the model can be and how much text it should see.',
+    up: 'A bigger budget buys a bigger model, but only as the square root: a hundred times the compute is ten times the parameters. The rest goes on more tokens.',
+    down: 'A smaller budget forces a smaller model. Spending it on a large model trained briefly is the mistake the field spent years making.',
+    note: 'Training costs roughly six operations per parameter per token, and about twenty tokens per parameter is optimal, so the budget fixes both numbers and leaves no free choice.',
+  },
+  labHeads: {
+    what: 'How many attention heads each block gets. The width is divided between them, so more heads means each one is narrower.',
+    up: 'More heads can attend to more things at once, and each has less room to represent what it found.',
+    down: 'Fewer, wider heads. At one head the block can only pay attention to one pattern at a time.',
+    note: 'The width has to divide evenly by this, and the gate will stop you if it does not, because every attention implementation assumes it.',
+  },
+  labMerges: {
+    what: 'How many merge operations the tokenizer learns, which sets the size of the vocabulary.',
+    up: 'A larger vocabulary means each word is fewer tokens, so more text fits in the context window. It also means a bigger embedding table and more parameters spent on rare pieces.',
+    down: 'A small vocabulary splits words into many pieces, which wastes context and makes the model work harder to reassemble meaning.',
+    note: 'This is frozen before pretraining and cannot change afterwards, which is why step 09 cannot teach the model a character it has never seen.',
+  },
+  labSteps: {
+    what: 'How many optimizer steps the pretraining run takes. Each one processes a batch and updates every weight once.',
+    up: 'A longer run reaches a lower loss and takes proportionally longer. Past a point it starts memorising the corpus rather than learning from it.',
+    down: 'A short run leaves the model undertrained, and the evaluation gate will catch it: an undertrained transformer genuinely loses to a bigram lookup table.',
+    note: 'Watch the two curves. When the held-out loss stops following the training loss down, more steps are making the model worse at the only thing that matters.',
+  },
+  labBanned: {
+    what: 'Words the deployed model must never produce, enforced at sampling time rather than inside the model.',
+    up: 'More constraints means more refusals and more collateral: blocking a word also blocks every other word that starts with the same token piece.',
+    down: 'No constraints is a legitimate choice for a model that writes short stories. What matters is that it was a decision somebody recorded, not an omission.',
+    note: 'Step 08 shows why this mechanism is blunt, and why nothing inside the model knows the rule exists.',
+  },
 } satisfies Record<string, VarInfo>;
 
 export type VarKey = keyof typeof V;

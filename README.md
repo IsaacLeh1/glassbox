@@ -30,7 +30,7 @@ pnpm dev
 | 04 | **Language** | A real transformer, trained in the tab. Follow text through byte-pair tokenization, embeddings, every attention head, the residual stream, the logits and the sampling step that picks the next token. |
 | 05 | **Scale** | Plan a frontier training run on real hardware. Watch a simulated cluster work the job, lose a GPU, and recover from a checkpoint. |
 | 06 | **Optimizing prompts** | Connect your own model, measure it on a task, then let a DSPy optimizer rewrite the prompt and pick its own examples. Compare before and after example by example, and export the equivalent real Python. |
-| 07 | **Build your own** | Pull a dataset live from Hugging Face, design a transformer to your own specification, pick a compute device, set a RAM and CPU budget your machine can live with, train it, and measure yourself against a real GPU cluster. |
+| 07 | **Build your own** | **Run it like a lab**: the same programme NVIDIA, OpenAI or Anthropic would run, in eight gated stages — charter, data cleaning, compute budget, frozen architecture, pretraining, evaluation gate, safety review, launch. Each gate is a real check against your own text and model, and the model that comes out is the one the rest of the walkthrough uses. Then, separately: Pull a dataset live from Hugging Face, design a transformer to your own specification, pick a compute device, set a RAM and CPU budget your machine can live with, train it, and measure yourself against a real GPU cluster. |
 | 08 | **Guardrails** | Five mechanisms sit between a request and an answer and only one is inside the model. Block tokens live and watch the model route around them, find a behaviour direction inside the network and push along it, and see why there is no list of rules in there. |
 | 09 | **Communication** | Open the model you trained in step 07. Read its weights, give it a prompt, then scrub back and forth through the exact forward pass behind every token it produced, with a logit lens showing what it would have said if it had stopped early. Then edit a weight, switch an attention head off, apply a guardrail or teach it something new, and re-run the identical prompt to see what changed. |
 | 10 | **Evaluation** | The step almost everyone skips, in the order professionals actually do it. Write down what success means, cut a held-out test set, find out what a bigram lookup table already scores, commit to a bar you cannot see past, and only then run the model. The page counts how many times you change the test after seeing a number. |
@@ -85,6 +85,12 @@ This is the part that matters, so it is stated precisely.
   cases. The speed benefit is calculated from byte counts, and the panel says so.
 - A **key-value cache**, with a test asserting the cached decode path produces logits identical to
   recomputing the whole context, and a measured speed-up on the reader's own machine.
+- **Data hygiene that actually runs**: exact and near-duplicate detection over the corpus, and
+  decontamination against text held back before anything else happened. The built-in corpora turn
+  out to repeat themselves, which is worth a reader discovering on data they assumed was fine.
+- **Scaling-law budgeting**: a compute budget split between model size and tokens at the
+  conventional twenty tokens per parameter, which warns when the budget would buy a model larger
+  than the available text can fill.
 - **Label-free drift detection**: population stability index, Jensen-Shannon divergence, model
   surprise on incoming text, out-of-vocabulary rate. Traffic is real text from real corpora and
   every signal is measured, with the true quality computed alongside so the proxies can be judged
@@ -197,6 +203,7 @@ src/
     kvcache.ts      incremental decode with a key-value cache, and timing
     serving.ts      memory-bound decode, cost per token, M/M/1 queueing
     monitor.ts      drift measures, traffic windows, alerting, the retrain case
+    pipeline.ts     the gated lab programme: stages, checks, dedup, scaling
     steering.ts     difference-in-means directions and token ban resolution
   sim/
     cluster.ts    capacity planning (real) + device telemetry (simulated)
@@ -238,7 +245,7 @@ set `OLLAMA_ORIGINS`.
 pnpm test
 ```
 
-319 tests. The ones worth knowing about:
+348 tests. The ones worth knowing about:
 
 - Analytic gradients checked against central finite differences for the MLP (all three task types,
   with and without L2) and for **every tensor** in the transformer.
@@ -273,6 +280,8 @@ pnpm test
   infinity unfloored and renders as a broken dashboard.
 - Scoring every position from one forward pass asserted to equal walking the sequence token by token,
   because the monitoring path takes the fast route and it is only legitimate if the numbers match.
+- The lab programme asserted to be enterable only in order, to block on an unestablished licence, and
+  never to present a gate that cannot be cleared.
 - Regression tests for ten real bugs found during development: a repeat detector that called any
   coincidental word alignment a loop; a diagnostic that scored samples against an empty corpus; a
   warmup schedule that gave step zero a learning rate of exactly zero; a banned token that could

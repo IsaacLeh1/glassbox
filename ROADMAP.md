@@ -68,7 +68,7 @@ The real order of work at a company that ships models:
 |---|---|
 | 1. Define the problem and what success means | partly — step 10 opens by making you write it down |
 | 2. **Design the evaluation before training anything** | yes — step 10 |
-| 3. Source, licence, clean and deduplicate data | partly — step 07 loads real data, but does not clean or inspect it |
+| 3. Source, licence, clean and deduplicate data | yes — the lab programme in step 07 |
 | 4. Tokenizer decisions | yes — step 04 |
 | 5. Choose architecture and size against a compute budget | yes — steps 05 and 07 |
 | 6. Pretraining run, with monitoring and incident handling | yes — steps 05 and 07 |

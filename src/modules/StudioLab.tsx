@@ -11,6 +11,7 @@ import {
 import { CORPORA, getCorpus } from '../engine/corpus';
 import { DEFAULT_LM_TRAIN, LMTrainer } from '../engine/lmTrainer';
 import { useModel } from '../store/model';
+import LabRun from './LabRun';
 import { DEFAULT_TCONFIG, sampleToken, type TransformerConfig } from '../engine/transformer';
 import { mulberry32 } from '../engine/tensor';
 import {
@@ -51,7 +52,7 @@ import { useFrameLoop } from '../ui/loop';
 import type { BackendId } from '../engine/compute';
 import type { RunFacts } from '../engine/diagnostics';
 
-type Tab = 'data' | 'design' | 'train' | 'compare';
+type Tab = 'lab' | 'data' | 'design' | 'train' | 'compare';
 
 /**
  * Opens a page on the Hugging Face hub in a new tab, so the reader can look at
@@ -317,6 +318,7 @@ export default function StudioLab() {
           value={tab}
           onChange={setTab}
           options={[
+            { id: 'lab' as Tab, label: 'Run it like a lab' },
             { id: 'data' as Tab, label: '1 · Get data' },
             { id: 'design' as Tab, label: '2 · Design the model' },
             { id: 'train' as Tab, label: '3 · Train it' },
@@ -331,6 +333,9 @@ export default function StudioLab() {
           <Badge tone="accent">{fmtCount(paramCountFor(cfg))} params</Badge>
         </div>
       </div>
+
+      {/* ========================================================= the programme */}
+      {tab === 'lab' && <LabRun />}
 
       {/* ================================================================ data */}
       {tab === 'data' && (
