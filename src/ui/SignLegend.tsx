@@ -22,7 +22,7 @@ function Swatch({ color, label, sub }: { color: string; label: string; sub: stri
 /**
  * What the two colours mean, everywhere in the application.
  *
- * Blue and amber are used consistently for negative and positive throughout
+ * Blue and orange are used consistently for negative and positive throughout
  * Glassbox, so this is explained once, properly, and referenced from the
  * places that use it. The pair is chosen over red and green because it stays
  * distinguishable for viewers with red-green colour blindness.
@@ -37,7 +37,7 @@ export default function SignLegend({ compact = false }: { compact?: boolean }) {
       />
       <Swatch
         color="rgba(245, 158, 11, 0.95)"
-        label="Amber means positive"
+        label="Orange means positive"
         sub="This number is above zero. Whatever it is attached to argues for the answer."
       />
       <Swatch
@@ -56,7 +56,7 @@ export default function SignLegend({ compact = false }: { compact?: boolean }) {
   if (compact) return swatches;
 
   return (
-    <Panel title="What blue and amber mean" subtitle="The same two colours are used for this everywhere in the app">
+    <Panel title="What blue and orange mean" subtitle="The same two colours are used for this everywhere in the app">
       {swatches}
 
       <div className="mt-4">
@@ -73,7 +73,7 @@ export default function SignLegend({ compact = false }: { compact?: boolean }) {
                   What actually changes in the model
                 </div>
                 <p className="mb-2">
-                  <strong style={{ color: 'var(--pos)' }}>Drag a weight toward amber</strong> and you are
+                  <strong style={{ color: 'var(--pos)' }}>Drag a weight toward orange</strong> and you are
                   telling the model: when this input goes up, push the answer up too. Evidence in favour.
                   Somewhere in a real language model, this is the connection that makes the word
                   &ldquo;not&rdquo; raise the chance of a negative word coming next.
@@ -91,13 +91,6 @@ export default function SignLegend({ compact = false }: { compact?: boolean }) {
               </div>
 
               <p>
-                In the square picture of the input space the same rule applies to the answer rather than to a
-                weight: amber regions are where the model says yes, blue regions are where it says no, and the
-                pale band between them is where it genuinely is not sure. That pale band is the boundary, and
-                almost everything in training is about moving it to the right place.
-              </p>
-
-              <p>
                 One thing worth internalising: a big negative number is not a mistake or a broken value. In a
                 trained model, roughly half of all weights are negative. &ldquo;Push down&rdquo; and
                 &ldquo;push up&rdquo; are equally useful things to have learned.
@@ -112,7 +105,7 @@ export default function SignLegend({ compact = false }: { compact?: boolean }) {
                 fixed absolute scale.
               </p>
               <Eq note="From ui/kit.tsx. Magnitude drives alpha, so a value near zero fades into the background.">
-                hue = x ≥ 0 ? amber : blue,  alpha = min(1, |x| / max)
+                hue = x ≥ 0 ? orange : blue,  alpha = min(1, |x| / max)
               </Eq>
               <p>
                 For a probability field the mapping is recentred on <M>0.5</M>: the displayed quantity is{' '}
@@ -120,7 +113,7 @@ export default function SignLegend({ compact = false }: { compact?: boolean }) {
                 boundary is exactly the pale line.
               </p>
               <p>
-                Blue and amber are used rather than red and green because they remain distinguishable under
+                Blue and orange are used rather than red and green because they remain distinguishable under
                 deuteranopia and protanopia, and because they differ in luminance as well as hue.
               </p>
             </div>
@@ -129,7 +122,7 @@ export default function SignLegend({ compact = false }: { compact?: boolean }) {
             <Eq>
               <div className="space-y-1 text-[11px]">
                 <div>const NEG = [76, 126, 243]; // blue</div>
-                <div>const POS = [245, 158, 11]; // amber</div>
+                <div>const POS = [245, 158, 11]; // orange</div>
                 <div>const t = Math.min(1, Math.abs(v) / max);</div>
                 <div>const [r, g, b] = v &gt;= 0 ? POS : NEG;</div>
                 <div>return `rgba(${'{r}'}, ${'{g}'}, ${'{b}'}, ${'{t}'})`;</div>
@@ -141,7 +134,7 @@ export default function SignLegend({ compact = false }: { compact?: boolean }) {
 
       <div className="mt-3">
         <Callout tone="insight" title="Why sign matters more than size">
-          If you flip one weight from amber to blue you have not made the model slightly worse at its job, you
+          If you flip one weight from orange to blue you have not made the model slightly worse at its job, you
           have reversed what that piece of evidence means to it. Sign changes behaviour; magnitude changes
           confidence. When you are dragging sliders in this step, watch which of those two you are doing.
         </Callout>

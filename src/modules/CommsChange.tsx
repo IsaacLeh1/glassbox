@@ -363,7 +363,7 @@ export default function CommsChange({
                   />
                 </div>
                 <p className="mt-2 text-[11.5px]" style={{ color: 'var(--text-3)' }}>
-                  Click any cell to select it. Blue is positive, orange is negative.
+                  Click any cell to select it. Orange is positive, blue is negative.
                 </p>
 
                 {cell && (

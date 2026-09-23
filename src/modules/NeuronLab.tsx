@@ -384,7 +384,7 @@ function NetworkExplorer() {
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
         <Panel
           title="Every weight in the network"
-          subtitle="Click any connection to select it. Blue is negative, amber is positive, thickness is magnitude."
+          subtitle="Click any connection to select it. Blue is negative, orange is positive, thickness is magnitude."
           right={<Badge tone="accent">{net.paramCount} parameters</Badge>}
         >
           <NetworkGraph
@@ -507,7 +507,9 @@ function NetworkExplorer() {
         </div>
       </div>
 
-      <SignLegend />
+      <Panel title="Reading the colours" subtitle="The same rule as step 01, in brief">
+        <SignLegend compact />
+      </Panel>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Panel
@@ -524,7 +526,7 @@ function NetworkExplorer() {
               <div className="min-w-[180px] flex-1 space-y-2 text-[12px]" style={{ color: 'var(--text-2)' }}>
                 <p>
                   This is the output of that single neuron across the whole input plane, before anything
-                  downstream sees it. Amber is where it fires positive, blue where it fires negative.
+                  downstream sees it. Orange is where it fires positive, blue where it fires negative.
                 </p>
                 <p style={{ color: 'var(--text-3)' }}>
                   Each hidden neuron contributes one soft straight edge. The output layer adds those edges

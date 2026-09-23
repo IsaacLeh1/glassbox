@@ -235,8 +235,8 @@ export default function CommsLab() {
                       {fmtInt(M.paramCount)} numbers below and nothing else.
                     </p>
                     <p>
-                      Pick any table on the right to see it. Each cell is one weight. Blue means positive,
-                      orange means negative, and the brighter the cell the further from zero it is. What you
+                      Pick any table on the right to see it. Each cell is one weight. Orange means positive,
+                      blue means negative, and the brighter the cell the further from zero it is. What you
                       cannot do is look at a cell and say what it means, and that is not a limitation of this
                       display. Meaning in a model is spread across thousands of these at once.
                     </p>

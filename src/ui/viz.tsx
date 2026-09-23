@@ -343,7 +343,7 @@ export function FieldCanvas({
         const v = field[k];
         let r: number, g: number, b: number;
         if (mode === 'prob') {
-          // 0 -> blue class, 1 -> amber class, 0.5 -> neutral.
+          // 0 -> blue class, 1 -> orange class, 0.5 -> neutral.
           const t = Math.max(0, Math.min(1, v));
           const d = (t - 0.5) * 2;
           const a = Math.abs(d) * 0.62;

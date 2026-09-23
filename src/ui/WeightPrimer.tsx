@@ -50,20 +50,70 @@ export default function WeightPrimer() {
             <p>
               There is one more number, called the <strong>bias</strong>, and it does not belong to any input.
               It is your starting opinion before you look at anything — whether you are the sort of person who
-              takes an umbrella by default. It nudges the final score up or down no matter what the inputs say.
+              takes an umbrella by default. It nudges the final score up or down no matter what the inputs
+              say, and you can watch it do exactly that in a moment.
             </p>
 
             <p>
               Below, the two sliders are the weights and the third is the bias. The square picture is the
-              answer for every possible combination of the two inputs at once: amber where the score comes out
-              high, blue where it comes out low. Move a slider and watch the whole picture respond.
+              answer for every possible combination of the two inputs at once. Left to right is one input,
+              bottom to top is the other, so every point in the square is one particular day.
             </p>
 
-            <Callout tone="insight" title="This is the whole idea">
-              A real AI system is this exact calculation — multiply by weights, add up, decide — repeated
-              billions of times with billions of weights. Nothing cleverer gets added later. There is only
-              ever more of it, wired together in layers. If you understand this panel, you understand the unit
-              that everything else is built from.
+            <div className="rounded-lg p-3" style={{ background: 'var(--bg-2)' }}>
+              <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.07em]" style={{ color: 'var(--text-3)' }}>
+                Which colour means take it
+              </div>
+              <p className="mb-2">
+                <strong style={{ color: 'var(--pos)' }}>Orange is take the umbrella.</strong> The score came
+                out high on those days, and the deeper the orange the more certain the answer.
+              </p>
+              <p className="mb-2">
+                <strong style={{ color: 'var(--neg)' }}>Blue is leave it at home.</strong> The score came out
+                low. Again, deeper means more certain.
+              </p>
+              <p>
+                <strong>The pale band where the two meet is the days it cannot call.</strong> The score landed
+                near zero, the evidence is balanced, and a small change in the weather would flip the answer.
+                Almost everything that happens in training is about moving that band to the right place.
+              </p>
+            </div>
+
+            <p>
+              Now the <strong>bias</strong>, which is the easiest of the three to see at work. It belongs to
+              neither input, so changing it cannot tilt that band &mdash; it slides the whole picture bodily.
+              Push the bias up and orange floods across the square: you are becoming the sort of person who
+              takes an umbrella on days that do not really warrant it. Push it down and blue takes over,
+              until you would walk into a downpour rather than carry one. The weights decide{' '}
+              <em>which way the band leans</em>. The bias decides <em>how much convincing you need</em>.
+            </p>
+
+            <p>
+              Move any slider and watch the whole picture respond. Nothing is being replayed &mdash; the
+              square is recomputed point by point, every frame.
+            </p>
+
+            <Callout tone="insight" title="What any of this has to do with AI">
+              <p className="mb-2">
+                Swap the umbrella for the next word in a sentence and you have a language model. The inputs
+                stop being sky and forecast and become numbers standing for the words so far. The answer
+                stops being take it or leave it and becomes a score for every word in the vocabulary. The
+                calculation in between does not change at all: multiply each input by its weight, add up,
+                decide.
+              </p>
+              <p className="mb-2">
+                A real model is this, with billions of weights instead of two, stacked in layers so that the
+                answers of one become the inputs of the next. Nothing cleverer is added later. When a model
+                &ldquo;knows&rdquo; that the word after <em>not</em> tends to be a negative one, that
+                knowledge <em>is</em> a weight, sitting somewhere in the pile, orange because it pushes that
+                answer up. When a model declines to say something, some set of weights is pushing those words
+                down, blue.
+              </p>
+              <p>
+                Which is why nobody can point to the line of code where a model learned a fact. There is no
+                line. There is this picture, several billion times over, and what the model knows lives in
+                the shape of it.
+              </p>
             </Callout>
           </div>
         }
