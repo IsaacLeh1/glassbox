@@ -1,7 +1,19 @@
 import { Link } from 'react-router-dom';
-import { MODULES } from './registry';
+import { STEPS } from './registry';
 import { Badge, Callout, DepthSwitch, Panel } from '../ui/kit';
 import { useApp } from '../store/app';
+
+/**
+ * Where each step sits in the real sequence of work. Shown on the first card
+ * of each phase, so the path reads as four movements rather than twelve
+ * unrelated topics.
+ */
+const PHASES: Record<number, string> = {
+  0: 'Foundations',
+  4: 'Scale and tooling',
+  6: 'Build your own',
+  9: 'Ship and run it',
+};
 
 function Tile({ n, title, body }: { n: string; title: string; body: string }) {
   return (
@@ -19,32 +31,42 @@ function Tile({ n, title, body }: { n: string; title: string; body: string }) {
 
 export default function Home() {
   const completed = useApp((s) => s.completed);
-  const done = MODULES.filter((m) => completed[m.path]).length;
+  const done = STEPS.filter((m) => completed[m.path]).length;
+  const totalMinutes = STEPS.reduce((a, m) => a + m.minutes, 0);
+  // The first step not yet finished, so the button continues the path
+  // instead of sending a returning reader back to the beginning.
+  const resume = STEPS.find((m) => !completed[m.path]) ?? null;
 
   return (
     <div className="mx-auto max-w-[1080px] px-6 py-10">
       <div className="mb-10">
         <div className="mb-3 flex items-center gap-2">
-          <Badge tone="accent">Interactive course</Badge>
-          <Badge>{done} of {MODULES.length} complete</Badge>
+          <Badge tone="accent">A guided walkthrough</Badge>
+          <Badge>{STEPS.length} steps</Badge>
+          <Badge>{totalMinutes} min end to end</Badge>
+          {done > 0 && <Badge tone="ok">{done} done</Badge>}
         </div>
         <h1 className="text-[30px] font-semibold leading-tight tracking-tight">
-          Everything in here is really computing.
+          Build a model, ship it, and watch it break.
         </h1>
         <p className="mt-3 max-w-[64ch] text-[14px] leading-relaxed" style={{ color: 'var(--text-2)' }}>
-          Most explanations of AI show you a diagram of a neural network and ask you to imagine the rest.
-          Glassbox runs the actual arithmetic. Every weight you drag, every gradient you step through, and
-          every attention head you inspect is a live computation happening in this tab. Nothing is a
-          pre-recorded animation.
+          This is not a set of lessons about AI. It is the actual sequence a company works through to
+          put a model into production, walked end to end at a size small enough to run in this tab.
+          You start at a single weight and finish watching a deployed model drift away from the traffic
+          it was built for, and every step hands its result to the next one.
+        </p>
+        <p className="mt-3 max-w-[64ch] text-[14px] leading-relaxed" style={{ color: 'var(--text-2)' }}>
+          Everything here is really computing. Every weight you drag, every gradient you step through and
+          every attention head you inspect is a live calculation, not a pre-recorded animation.
         </p>
 
         <div className="mt-6 flex flex-wrap items-center gap-3">
           <Link
-            to="/neuron"
+            to={resume ? resume.path : STEPS[0].path}
             className="focus-ring inline-flex items-center gap-2 rounded-lg px-4 py-2 text-[13px] font-semibold"
             style={{ background: 'var(--accent)', color: '#04121a' }}
           >
-            Start with a single neuron
+            {done > 0 && resume ? `Resume at step ${resume.num}` : 'Start the walkthrough'}
             <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
               <path d="M6 3.5 10.5 8 6 12.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -58,8 +80,11 @@ export default function Home() {
         </div>
       </div>
 
+      <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.09em]" style={{ color: 'var(--text-3)' }}>
+        The path, in order
+      </div>
       <div className="mb-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {MODULES.map((m) => {
+        {STEPS.map((m, i) => {
           const isDone = !!completed[m.path];
           return (
             <Link
@@ -69,8 +94,18 @@ export default function Home() {
               style={{ boxShadow: 'var(--shadow)' }}
             >
               <div className="mb-2 flex items-center justify-between">
-                <span className="mono text-[10.5px] font-semibold" style={{ color: 'var(--accent)' }}>
-                  {m.num}
+                <span className="flex items-center gap-1.5">
+                  <span className="mono text-[10.5px] font-semibold" style={{ color: 'var(--accent)' }}>
+                    {m.num}
+                  </span>
+                  {PHASES[i] && (
+                    <span
+                      className="text-[9.5px] font-semibold uppercase tracking-[0.08em]"
+                      style={{ color: 'var(--text-3)' }}
+                    >
+                      {PHASES[i]}
+                    </span>
+                  )}
                 </span>
                 <span className="flex items-center gap-1.5">
                   {isDone && (
@@ -126,7 +161,7 @@ export default function Home() {
             <Tile
               n="06"
               title="Your own model, connected"
-              body="Point the DSPy module at any OpenAI-compatible endpoint and watch an optimizer measurably improve a prompt on your model, then export the equivalent real Python."
+              body="Point the DSPy step at any OpenAI-compatible endpoint and watch an optimizer measurably improve a prompt on your model, then export the equivalent real Python."
             />
           </div>
         </Panel>
@@ -153,7 +188,7 @@ export default function Home() {
           </Panel>
 
           <Callout tone="insight" title="What is simulated">
-            Exactly one thing. In module 05 the cluster hardware is a simulation, because there is no GPU
+            Exactly one thing. In step 05 the cluster hardware is a simulation, because there is no GPU
             fleet in a browser tab. Its cost and timing arithmetic is real, computed from published
             specifications, and the loss values streaming through its logs come from a model genuinely
             training on this page. Everything else in Glassbox is computing for real.

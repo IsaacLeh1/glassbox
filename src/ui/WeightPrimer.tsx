@@ -84,7 +84,7 @@ export default function WeightPrimer() {
             </p>
             <p>
               A layer applies this to many neurons at once as <M>a = f(Wx + b)</M>, which is the matrix
-              expression module 02 takes apart.
+              expression step 02 takes apart.
             </p>
           </div>
         }

@@ -212,7 +212,7 @@ export default function FrontierTab({ spec, onSpec }: { spec: ClusterSpec; onSpe
       <div className="grid gap-4 lg:grid-cols-2">
         <Panel title="What changing one weight does at this scale">
           <p className="mb-3 text-[12.5px] leading-relaxed" style={{ color: 'var(--text-2)' }}>
-            You can edit one weight in module 01 and watch the answer move, because that model has a few dozen
+            You can edit one weight in step 01 and watch the answer move, because that model has a few dozen
             of them. Here is the same act, in proportion.
           </p>
 
@@ -319,7 +319,7 @@ export default function FrontierTab({ spec, onSpec }: { spec: ClusterSpec; onSpe
               <p className="text-[11.5px] leading-relaxed" style={{ color: 'var(--text-3)' }}>
                 Change no weights at all. Find a direction in the model&apos;s internal state and add it while
                 the model runs. One vector the width of the model — {fmtInt(shape.dModel)} numbers against{' '}
-                {fmtCount(params)} — can visibly shift behaviour. Module 08 does exactly this, for real, on
+                {fmtCount(params)} — can visibly shift behaviour. Step 08 does exactly this, for real, on
                 the model in your browser.
               </p>
             </div>
@@ -332,7 +332,7 @@ export default function FrontierTab({ spec, onSpec }: { spec: ClusterSpec; onSpe
                 </span>
               </div>
               <p className="text-[11.5px] leading-relaxed" style={{ color: 'var(--text-3)' }}>
-                Cheapest of all, reversible, and often the largest single improvement available. Module 06
+                Cheapest of all, reversible, and often the largest single improvement available. Step 06
                 measures exactly how much it buys on a model you connect yourself.
               </p>
             </div>

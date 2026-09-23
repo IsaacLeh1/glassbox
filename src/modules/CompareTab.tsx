@@ -257,7 +257,7 @@ const secondsLocal     = totalFlops / localFlopsPerSec;`}</Code>
           <p className="mt-2 text-[12.5px] leading-relaxed" style={{ color: 'var(--text-3)' }}>
             The genuinely new problems at scale are not mathematical. They are keeping thousands of devices in
             step, surviving hardware failures, moving gradients fast enough, and not running out of memory.
-            Module 05 is about exactly those.
+            Step 05 is about exactly those.
           </p>
           <div className="mt-3">
             <Callout tone="insight">

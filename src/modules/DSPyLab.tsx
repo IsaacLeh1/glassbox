@@ -299,7 +299,7 @@ export default function DSPyLab() {
           </Panel>
 
           <div className="space-y-4">
-            <Panel title="What this module does">
+            <Panel title="What this step does">
               <Depth
                 plain={
                   <>

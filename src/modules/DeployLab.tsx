@@ -47,7 +47,7 @@ import {
 import { DEFAULT_GEN, casesFromIds, modelPredictor, runEval } from '../engine/evals';
 
 /**
- * Module 11: putting a model into service.
+ * Step 11: putting a model into service.
  *
  * Training is a bill you pay once. Serving is the bill that never stops, and
  * within a few months it is usually the larger of the two. Almost all of it
@@ -168,7 +168,7 @@ export default function DeployLab() {
             You need a model to deploy.
           </div>
           <p className="mb-4">
-            This module quantises the actual weights and times the actual forward pass, so it needs a real
+            This step quantises the actual weights and times the actual forward pass, so it needs a real
             model. Build one in <Link to="/studio" style={{ color: 'var(--accent)' }}>Build your own</Link>,
             or start from one trained here.
           </p>
@@ -250,7 +250,7 @@ export default function DeployLab() {
                       The catch is that a weight stored in fewer bits is a weight stored less exactly.
                       Below runs the real thing: the weights are snapped onto a coarse grid and the
                       damage is measured on held-out cases using the same harness as{' '}
-                      <Link to="/evals" style={{ color: 'var(--accent)' }}>module 10</Link>.
+                      <Link to="/evals" style={{ color: 'var(--accent)' }}>step 10</Link>.
                     </p>
                   </>
                 }
@@ -370,7 +370,7 @@ w = step * scale;   // the weight really is on the grid now`}</Code>
                     <Callout tone="warn">
                       A real but modest loss for a large saving. Whether this trade is worth taking is a
                       product decision, and it is exactly the kind of decision the bar you committed to in{' '}
-                      <Link to="/evals" style={{ color: 'var(--accent)' }}>module 10</Link> exists to
+                      <Link to="/evals" style={{ color: 'var(--accent)' }}>step 10</Link> exists to
                       settle. Without that bar, the temptation is to accept whatever you happen to get.
                     </Callout>
                   ) : (
@@ -982,7 +982,7 @@ const p99  = Math.log(100) / spare;`}</Code>
                 You have now been through the sequence a company actually follows: decide what success
                 means and how it will be measured, get and shape the data, choose an architecture against a
                 budget, train it, evaluate it honestly against baselines, constrain it, and serve it within
-                a latency and cost envelope. The one stage still missing from this course is what happens
+                a latency and cost envelope. The one stage still missing from this walkthrough is what happens
                 after launch &mdash; watching a live model, collecting what users do with it, noticing when
                 the world has moved underneath it, and deciding when to go round again.
               </p>

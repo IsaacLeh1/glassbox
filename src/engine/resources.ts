@@ -137,7 +137,7 @@ export function checkBudget(mem: MemoryBreakdown, budgetMB: number, machine: Mac
 }
 
 /**
- * Measured local throughput, converted into the terms module 05 uses so the
+ * Measured local throughput, converted into the terms step 05 uses so the
  * same model can be priced on real accelerators.
  */
 export interface ThroughputComparison {

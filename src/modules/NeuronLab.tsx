@@ -594,7 +594,7 @@ const value = W.data[row * W.cols + col];`}</Code>
 
       <Callout tone="insight">
         Nothing in this network is doing anything clever yet. The weights are still the random numbers it was
-        born with, which is why the accuracy is near chance on anything harder than a straight line. Module 02
+        born with, which is why the accuracy is near chance on anything harder than a straight line. Step 02
         is about where good weights come from.
       </Callout>
     </div>

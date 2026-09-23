@@ -348,7 +348,7 @@ for (let i = 0; i < n; i++) {
         <Callout tone="insight">
           One caution: a stack of matrix multiplies with nothing in between collapses. A×B×C is just one matrix.
           Without a nonlinearity between layers, a hundred-layer network is mathematically identical to a
-          single layer. That is why the activation functions in module 01 are not decoration.
+          single layer. That is why the activation functions in step 01 are not decoration.
         </Callout>
       </div>
     </div>

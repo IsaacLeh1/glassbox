@@ -45,7 +45,7 @@ function TrainGate({ trainer, trained, bump }: Ctx) {
   if (trained) return null;
   return (
     <Panel
-      title="This module needs a trained model"
+      title="This step needs a trained model"
       subtitle="Guardrails only make sense on a model that has opinions to constrain"
       right={
         <div className="flex items-center gap-1.5">

@@ -89,7 +89,7 @@ interface Corpus {
 export default function StudioLab() {
   const [tab, setTab] = useState<Tab>('data');
 
-  // Whatever is built here becomes the model the rest of the course uses.
+  // Whatever is built here becomes the model the rest of the walkthrough uses.
   const publish = useModel((s) => s.publish);
   const republish = useModel((s) => s.publish);
 

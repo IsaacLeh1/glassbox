@@ -1,4 +1,4 @@
-import { NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { DepthSwitch, Badge } from './ui/kit';
 import { useApp } from './store/app';
@@ -15,7 +15,7 @@ import CommsLab from './modules/CommsLab';
 import EvalLab from './modules/EvalLab';
 import DeployLab from './modules/DeployLab';
 import MonitorLab from './modules/MonitorLab';
-import { MODULES } from './modules/registry';
+import { STEPS } from './modules/registry';
 
 function Logo() {
   return (
@@ -55,9 +55,9 @@ function Sidebar() {
           className="px-2 pb-1.5 pt-2 text-[10px] font-semibold uppercase tracking-[0.09em]"
           style={{ color: 'var(--text-3)' }}
         >
-          Course
+          Walkthrough
         </div>
-        {MODULES.map((m) => (
+        {STEPS.map((m) => (
           <NavLink
             key={m.path}
             to={m.path}
@@ -155,7 +155,7 @@ function Sidebar() {
 
 function Topbar() {
   const loc = useLocation();
-  const mod = MODULES.find((m) => loc.pathname.startsWith(m.path));
+  const mod = STEPS.find((m) => loc.pathname.startsWith(m.path));
   const markComplete = useApp((s) => s.markComplete);
   const completed = useApp((s) => s.completed);
 
@@ -170,7 +170,7 @@ function Topbar() {
       <div className="min-w-0">
         <div className="flex items-center gap-2">
           <span className="mono text-[10.5px] font-semibold" style={{ color: 'var(--accent)' }}>
-            MODULE {mod.num}
+            STEP {mod.num} OF {STEPS.length}
           </span>
           <h1 className="truncate text-[15px] font-semibold tracking-tight">{mod.title}</h1>
           <Badge>{mod.minutes} min</Badge>
@@ -195,12 +195,86 @@ function Topbar() {
   );
 }
 
+/**
+ * Back and next, at the foot of every step.
+ *
+ * This is what makes it a walkthrough rather than a set of pages: there is
+ * always one obvious way onward, and taking it marks the step behind you
+ * done. The sidebar still lets anyone jump about, because a reader who wants
+ * the attention diagrams should not have to sit through gradient descent
+ * first.
+ */
+function StepNav() {
+  const loc = useLocation();
+  const navigate = useNavigate();
+  const markComplete = useApp((s) => s.markComplete);
+  const i = STEPS.findIndex((m) => loc.pathname.startsWith(m.path));
+  if (i < 0) return null;
+
+  const prev = i > 0 ? STEPS[i - 1] : null;
+  const next = i < STEPS.length - 1 ? STEPS[i + 1] : null;
+
+  const onward = () => {
+    markComplete(STEPS[i].path);
+    if (next) navigate(next.path);
+    else navigate('/');
+  };
+
+  return (
+    <nav
+      className="mx-auto flex max-w-[1400px] flex-wrap items-stretch justify-between gap-3 px-6 pb-10 pt-2"
+      aria-label="Walkthrough"
+    >
+      {prev ? (
+        <Link
+          to={prev.path}
+          className="panel group flex min-w-0 max-w-[340px] flex-1 items-center gap-3 p-3 transition-colors"
+        >
+          <span className="shrink-0" style={{ color: 'var(--text-3)' }}>
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <path d="M10 3.5 5.5 8 10 12.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </span>
+          <span className="min-w-0">
+            <span className="block text-[10px] font-semibold uppercase tracking-[0.08em]" style={{ color: 'var(--text-3)' }}>
+              Step {prev.num}, back
+            </span>
+            <span className="block truncate text-[12.5px] font-medium">{prev.title}</span>
+          </span>
+        </Link>
+      ) : (
+        <span />
+      )}
+
+      <button
+        onClick={onward}
+        className="focus-ring group flex min-w-0 max-w-[400px] flex-1 cursor-pointer items-center justify-end gap-3 rounded-xl p-3 text-right transition-colors"
+        style={{ background: 'var(--accent)', color: '#04121a' }}
+      >
+        <span className="min-w-0">
+          <span className="block text-[10px] font-semibold uppercase tracking-[0.08em] opacity-70">
+            {next ? `Step ${next.num}, next` : 'That is the whole walkthrough'}
+          </span>
+          <span className="block truncate text-[13px] font-semibold">
+            {next ? next.title : 'Back to the beginning'}
+          </span>
+        </span>
+        <span className="shrink-0">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+            <path d="M6 3.5 10.5 8 6 12.5" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </span>
+      </button>
+    </nav>
+  );
+}
+
 export default function App() {
   const loc = useLocation();
   const markVisited = useApp((s) => s.markVisited);
 
   useEffect(() => {
-    const m = MODULES.find((x) => loc.pathname.startsWith(x.path));
+    const m = STEPS.find((x) => loc.pathname.startsWith(x.path));
     if (m) markVisited(m.path);
   }, [loc.pathname, markVisited]);
 
@@ -226,6 +300,7 @@ export default function App() {
             <Route path="/monitor" element={<MonitorLab />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          <StepNav />
         </div>
       </main>
     </div>

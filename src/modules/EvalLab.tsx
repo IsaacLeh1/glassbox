@@ -40,7 +40,7 @@ import {
 } from '../engine/evals';
 
 /**
- * Module 10: designing the evaluation before there is anything to evaluate.
+ * Step 10: designing the evaluation before there is anything to evaluate.
  *
  * The steps are numbered and deliberately gated. You cannot see a model score
  * until you have committed to what would count as success, because the moment
@@ -282,7 +282,7 @@ export default function EvalLab() {
           </div>
           <p className="mb-4">
             Strictly, you would design the evaluation before you had one &mdash; that is the whole argument
-            of this module. But the test set here is cut from the corpus the model was trained on, so it
+            of this step. But the test set here is cut from the corpus the model was trained on, so it
             needs one to exist. Build one in{' '}
             <Link to="/studio" style={{ color: 'var(--accent)' }}>Build your own</Link>, or start here.
           </p>
@@ -333,7 +333,7 @@ export default function EvalLab() {
                     <p>
                       So the order is fixed: say what the model must do, build the test, find out what a
                       trivial system already scores, commit to a bar, and only then look. The rest of this
-                      module walks that order and will not let you skip to the end.
+                      step walks that order and will not let you skip to the end.
                     </p>
                   </>
                 }
@@ -741,7 +741,7 @@ for p in [uniform, unigram, bigram, repeat, model]:
           <div className="grid content-start gap-5">
             <Panel title="Say what would count as success, before you look">
               <p className="mb-3 text-[12.5px] leading-relaxed" style={{ color: 'var(--text-2)' }}>
-                This is the moment the whole module exists for. Pick a number now, while you still do not
+                This is the moment the whole step exists for. Pick a number now, while you still do not
                 know the answer. Once it is recorded, changing it is still possible &mdash; it always is,
                 in real life too &mdash; but this page will count how many times you do, and show the count
                 next to the result.
@@ -806,7 +806,7 @@ for p in [uniform, unigram, bigram, repeat, model]:
                 <div className="mb-3">You have not committed to a bar yet.</div>
                 <p className="mb-4">
                   This page is deliberately locked until you have. Seeing the score first is precisely the
-                  thing the module is about, so it will not let you.
+                  thing this step is about, so it will not let you.
                 </p>
                 <Btn variant="primary" onClick={() => setStep('commit')}>
                   Go and set one
@@ -1064,8 +1064,8 @@ for p in [uniform, unigram, bigram, repeat, model]:
               <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-2)' }}>
                 At a company this is the loop: the evaluation is the fixed thing and the model is what
                 changes. You would go back to{' '}
-                <Link to="/studio" style={{ color: 'var(--accent)' }}>module 07</Link> and train longer, or
-                to <Link to="/comms" style={{ color: 'var(--accent)' }}>module 09</Link> and teach it
+                <Link to="/studio" style={{ color: 'var(--accent)' }}>step 07</Link> and train longer, or
+                to <Link to="/comms" style={{ color: 'var(--accent)' }}>step 09</Link> and teach it
                 something, then return here and re-run this identical test. What you would not do is edit
                 the test until the number improves &mdash; and now that you have watched that impulse
                 appear, you will recognise it when it does.

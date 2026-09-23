@@ -5,8 +5,8 @@ import type { LMTrainer } from '../engine/lmTrainer';
  * The one model the user owns.
  *
  * Until now every module built its own model and kept it in a local ref, so
- * nothing the user trained in module 07 could be examined in module 08 or
- * anywhere else. This store is the shared handle: module 07 publishes what it
+ * nothing the user trained in step 07 could be examined in step 08 or
+ * anywhere else. This store is the shared handle: step 07 publishes what it
  * trained, and any other module can pick it up.
  *
  * It is deliberately not persisted. A trainer holds live typed arrays and a

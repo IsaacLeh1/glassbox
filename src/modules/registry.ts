@@ -1,8 +1,12 @@
 /**
- * The course outline. Kept out of App.tsx so that editing it does not force a
- * full reload, and so any view can read the same list.
+ * The walkthrough, in order.
+ *
+ * These are steps rather than chapters of a course: they follow the sequence
+ * a company actually works through to put a model into production, and each
+ * one hands its result to the next. Kept out of App.tsx so that editing it
+ * does not force a full reload, and so any view can read the same list.
  */
-export interface ModuleDef {
+export interface StepDef {
   path: string;
   num: string;
   title: string;
@@ -11,7 +15,7 @@ export interface ModuleDef {
   minutes: number;
 }
 
-export const MODULES: ModuleDef[] = [
+export const STEPS: StepDef[] = [
   {
     path: '/neuron',
     num: '01',

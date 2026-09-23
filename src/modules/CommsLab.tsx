@@ -178,7 +178,7 @@ export default function CommsLab() {
       <div className="mx-auto max-w-[900px] px-6 py-10">
         <Empty>
           <div className="mb-3 text-[13px] font-medium" style={{ color: 'var(--text-2)' }}>
-            This module works on a model you trained yourself.
+            This step works on a model you trained yourself.
           </div>
           <p className="mb-4">
             Everything here reads the actual weights of one model and follows one prompt through them. Build
@@ -334,7 +334,7 @@ model.flatParams()      // one Float64Array holding all of them`}</Code>
                   <Callout tone="warn">
                     This model was built but never trained, so its weights are still the random numbers it
                     started with. It will produce nonsense, which is worth seeing once. Train it in{' '}
-                    <Link to="/studio" style={{ color: 'var(--accent)' }}>module 07</Link> and come back.
+                    <Link to="/studio" style={{ color: 'var(--accent)' }}>step 07</Link> and come back.
                   </Callout>
                 </div>
               )}

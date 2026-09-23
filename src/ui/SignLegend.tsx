@@ -143,7 +143,7 @@ export default function SignLegend({ compact = false }: { compact?: boolean }) {
         <Callout tone="insight" title="Why sign matters more than size">
           If you flip one weight from amber to blue you have not made the model slightly worse at its job, you
           have reversed what that piece of evidence means to it. Sign changes behaviour; magnitude changes
-          confidence. When you are dragging sliders in this module, watch which of those two you are doing.
+          confidence. When you are dragging sliders in this step, watch which of those two you are doing.
         </Callout>
       </div>
     </Panel>

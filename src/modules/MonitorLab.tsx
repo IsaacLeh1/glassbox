@@ -41,7 +41,7 @@ import {
 } from '../engine/monitor';
 
 /**
- * Module 12: after it ships.
+ * Step 12: after it ships.
  *
  * Every earlier module had an answer key. This one does not, and that is the
  * whole subject. Production gives you unlabelled traffic and silence, so the
@@ -292,7 +292,7 @@ const drift = psi(referenceHistogram, currentHistogram);`}</Code>
                 </div>
                 <div className="text-[12.5px] font-medium">Whether the answers were any good</div>
                 <p className="mt-1 text-[12px] leading-relaxed" style={{ color: 'var(--text-2)' }}>
-                  This module computes it anyway, from the continuations that really followed each request,
+                  This step computes it anyway, from the continuations that really followed each request,
                   and shows it beside the proxies so you can judge how well they track it. A real
                   deployment has no such column. Watching the two move together here is what earns the
                   proxies your trust; then you go back to only having the proxies.

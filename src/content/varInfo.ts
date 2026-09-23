@@ -6,7 +6,7 @@ import type { VarInfo } from '../ui/kit';
  * to check that no adjustable variable has been left unexplained.
  */
 export const V = {
-  /* ------------------------------------------------ module 01: weights -- */
+  /* ------------------------------------------------ step 01: weights -- */
 
   weight1: {
     what: 'How much the first input counts. That input gets multiplied by this number before everything is added up, so this is the amount of say it gets in the final answer.',
@@ -57,7 +57,7 @@ export const V = {
     note: 'ReLU with a high learning rate is the usual cause of dead neurons. Leaky ReLU avoids that.',
   },
 
-  /* --------------------------------------------- module 03: training --- */
+  /* --------------------------------------------- step 03: training --- */
 
   optimizer: {
     what: 'The rule for turning "this weight is wrong by this much" into an actual change to that weight. Some rules just step; others remember what happened on previous steps.',
@@ -120,7 +120,7 @@ export const V = {
     note: 'The gradient at the output is simply prediction minus target. Everything else is that number propagated backwards.',
   },
 
-  /* ---------------------------------------------- module 02: matrices -- */
+  /* ---------------------------------------------- step 02: matrices -- */
 
   matRowsA: {
     what: 'The number of rows in the left matrix. In a model this is usually the number of tokens or examples being processed at once.',
@@ -153,7 +153,7 @@ export const V = {
     note: 'Every size here is real and trains for real. The differences are only in the dimensions.',
   },
 
-  /* ---------------------------------------------- module 04: language -- */
+  /* ---------------------------------------------- step 04: language -- */
 
   corpus: {
     what: 'The body of text the tokenizer and the model are both built from.',
@@ -192,7 +192,7 @@ export const V = {
     note: 'Heads split the model width between them, so more heads means each is narrower.',
   },
 
-  /* ------------------------------------------------- module 05: scale -- */
+  /* ------------------------------------------------- step 05: scale -- */
 
   paramsB: {
     what: 'How many learned parameters the hypothetical model has. The main driver of both capability and cost.',
@@ -255,7 +255,7 @@ export const V = {
     note: 'This only changes the playback rate. It does not change any of the projected figures.',
   },
 
-  /* -------------------------------------------------- module 06: dspy -- */
+  /* -------------------------------------------------- step 06: dspy -- */
 
   lmBaseUrl: {
     what: 'The root address of an OpenAI-compatible API. The path /chat/completions is appended to it.',
@@ -324,7 +324,7 @@ export const V = {
     note: 'The COPRO and MIPRO optimizers will rewrite this for you and keep whatever measures better.',
   },
 
-  /* ------------------------------------------------- module 07: studio -- */
+  /* ------------------------------------------------- step 07: studio -- */
 
   hfDataset: {
     what: 'A dataset on the Hugging Face hub, loaded live over the public dataset viewer API.',
@@ -399,7 +399,7 @@ export const V = {
     note: 'The estimated wall-clock time is measured from your own machine, not guessed.',
   },
 
-  /* --------------------------------------------- module 08: guardrails -- */
+  /* --------------------------------------------- step 08: guardrails -- */
 
   banList: {
     what: 'Words the sampler is forbidden from producing. They are struck off the list of options before the model picks, so the model is never even consulted about it.',
@@ -426,7 +426,7 @@ export const V = {
     note: 'Ranks between 8 and 64 cover almost all practical use, and still amount to a tiny fraction of the full model.',
   },
 
-  /* ---------------------------------------- module 09: communication -- */
+  /* ---------------------------------------- step 09: communication -- */
 
   commsPrompt: {
     what: 'The text you hand the model. It is cut into tokens and becomes the only thing the model knows before it starts writing. There is no memory of anything you typed earlier and no instructions hidden underneath it.',
@@ -507,7 +507,7 @@ export const V = {
     note: 'Every change here can be undone exactly, because the weights were copied before the first step.',
   },
 
-  /* ------------------------------------------ module 10: evaluation -- */
+  /* ------------------------------------------ step 10: evaluation -- */
 
   evalCaseCount: {
     what: 'How many test cases to cut from the corpus. Each one is a prompt paired with the continuation that actually followed it, so the right answer is known without anyone having to write it.',
@@ -552,7 +552,7 @@ export const V = {
     note: 'If you are changing this to move the score, you are tuning the test rather than the model.',
   },
 
-  /* ------------------------------------------ module 11: deployment -- */
+  /* ------------------------------------------ step 11: deployment -- */
 
   deployBits: {
     what: 'How many bits to keep for each weight. Thirty-two is the usual starting point; production serving almost always uses eight or fewer.',
@@ -621,7 +621,7 @@ export const V = {
     note: 'Only the shapes change. The arithmetic applied to a 405 billion parameter model here is the same arithmetic applied to the one you trained.',
   },
 
-  /* ------------------------------------------ module 12: monitoring -- */
+  /* ------------------------------------------ step 12: monitoring -- */
 
   monitorStrange: {
     what: 'Where the unfamiliar traffic comes from. Your model was trained on one of the built-in corpora; this picks a different one to mix in, so the drift is a real change of subject rather than noise.',
@@ -645,7 +645,7 @@ export const V = {
     what: 'How many requests make up one window. This is your sample size per point on the chart.',
     up: 'More requests per window makes each point steadier and the underlying trend easier to see through the noise. It costs proportionally more time.',
     down: 'Fewer requests makes every point jumpy, and a jumpy signal is one you will either ignore or chase. Under-sampled monitoring produces false alarms and distrust in equal measure.',
-    note: 'The same sample-size argument as the confidence intervals in module 10, applied to a dashboard instead of a benchmark.',
+    note: 'The same sample-size argument as the confidence intervals in step 10, applied to a dashboard instead of a benchmark.',
   },
   monitorSignal: {
     what: 'Which measurement the alert watches. All four can be computed on live traffic with no ground truth at all, which is the only kind of signal production gives you.',

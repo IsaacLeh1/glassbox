@@ -1,7 +1,12 @@
 # Glassbox
 
-**See inside the machine.** An interactive course in how AI systems actually work, in which
-everything on screen is genuinely computing.
+**See inside the machine.** A guided walkthrough of how an AI system is actually built, shipped
+and kept running, in which everything on screen is genuinely computing.
+
+It is not a set of lessons about AI. It is the sequence a company works through to put a model
+into production, walked end to end in twelve steps at a size small enough to run in a browser tab:
+you start at a single weight and finish watching a deployed model drift away from the traffic it
+was built for. Each step hands its result to the next.
 
 Most explanations of AI show you a diagram of a neural network and ask you to imagine the rest.
 Glassbox runs the arithmetic. Every weight you drag, every gradient you step through and every
@@ -15,9 +20,9 @@ pnpm dev
 
 ---
 
-## The course
+## The walkthrough
 
-| # | Module | What you do |
+| # | Step | What you do |
 |---|--------|-------------|
 | 01 | **Weights** | Drag the three numbers inside a single neuron and watch the decision boundary rotate and slide. Then open a layered network, click any individual connection, and find the neuron responsible for one specific bend. |
 | 02 | **Matrices** | Multiply two matrices by hand with the dot product spelled out term by term. Then watch your own sentence become a one-hot matrix, an embedding, and a chain of real matmuls with live shapes and FLOP counts. Finish by putting those shapes next to GPT-2 and Llama 3. |
@@ -27,9 +32,9 @@ pnpm dev
 | 06 | **Optimizing prompts** | Connect your own model, measure it on a task, then let a DSPy optimizer rewrite the prompt and pick its own examples. Compare before and after example by example, and export the equivalent real Python. |
 | 07 | **Build your own** | Pull a dataset live from Hugging Face, design a transformer to your own specification, pick a compute device, set a RAM and CPU budget your machine can live with, train it, and measure yourself against a real GPU cluster. |
 | 08 | **Guardrails** | Five mechanisms sit between a request and an answer and only one is inside the model. Block tokens live and watch the model route around them, find a behaviour direction inside the network and push along it, and see why there is no list of rules in there. |
-| 09 | **Communication** | Open the model you trained in module 07. Read its weights, give it a prompt, then scrub back and forth through the exact forward pass behind every token it produced, with a logit lens showing what it would have said if it had stopped early. Then edit a weight, switch an attention head off, apply a guardrail or teach it something new, and re-run the identical prompt to see what changed. |
+| 09 | **Communication** | Open the model you trained in step 07. Read its weights, give it a prompt, then scrub back and forth through the exact forward pass behind every token it produced, with a logit lens showing what it would have said if it had stopped early. Then edit a weight, switch an attention head off, apply a guardrail or teach it something new, and re-run the identical prompt to see what changed. |
 | 10 | **Evaluation** | The step almost everyone skips, in the order professionals actually do it. Write down what success means, cut a held-out test set, find out what a bigram lookup table already scores, commit to a bar you cannot see past, and only then run the model. The page counts how many times you change the test after seeing a number. |
-| 11 | **Deployment** | Quantise your own weights and measure what the lost precision actually cost, scored on the module 10 harness. Watch a real key-value cache turn quadratic generation into linear, verified to produce identical logits. Then cost the whole thing against published hardware and find the load at which the queue goes vertical. |
+| 11 | **Deployment** | Quantise your own weights and measure what the lost precision actually cost, scored on the step 10 harness. Watch a real key-value cache turn quadratic generation into linear, verified to produce identical logits. Then cost the whole thing against published hardware and find the load at which the queue goes vertical. |
 | 12 | **Monitoring** | The stage with no answer key. Watch real traffic drift away from what your model was trained on using only signals that need no labels, reveal the hidden truth to see how well they tracked it, then try to set an alert that is neither useless nor exhausting. Finish by pricing the damage against the cost of the fix. |
 
 Every explanation is written three times. A switch in the sidebar toggles the whole application
@@ -90,13 +95,13 @@ This is the part that matters, so it is stated precisely.
   BootstrapFewShot, COPRO-style instruction search and a MIPRO-style joint search, all scored
   against a real metric on real held-out data.
 - Hugging Face dataset loading, straight from the public dataset viewer API.
-- Every capacity figure in module 05: step time, memory footprint, all-reduce volume, wall clock,
+- Every capacity figure in step 05: step time, memory footprint, all-reduce volume, wall clock,
   cost and power, computed from published accelerator specifications and the standard
   six-FLOPs-per-parameter-per-token estimate.
 
 **Simulated, and labelled as such in the app:**
 
-- Exactly one thing: the per-device telemetry in module 05 — GPU temperatures, utilisation jitter,
+- Exactly one thing: the per-device telemetry in step 05 — GPU temperatures, utilisation jitter,
   log ordering and the timing of failures. There is no GPU fleet in a browser tab. The cost and
   timing arithmetic around it is real, and the loss values streaming through its log come from a
   transformer genuinely training on the page while you watch.
@@ -109,7 +114,7 @@ side rather than hiding it.
 
 ## CPU and GPU
 
-Module 07 detects what this machine has — both WebGPU power preferences and the WebGL renderer
+Step 07 detects what this machine has — both WebGPU power preferences and the WebGL renderer
 string — and lets you benchmark the CPU against the GPU on the same matrix multiply.
 
 The benchmark is the point. It measures rather than asserts, and on most machines it shows the GPU
@@ -134,7 +139,7 @@ plainly next to the selector.
 
 ## Frontier scale
 
-Module 05 extends to runs of three trillion parameters and beyond, and nothing there is a lookup
+Step 05 extends to runs of three trillion parameters and beyond, and nothing there is a lookup
 table. The architecture is inferred from the parameter count using the standard transformer
 relation, which as a check reproduces GPT-3 exactly: feed it 175B and it returns 96 layers at width
 12288. The failure rate is calibrated against the one large published figure available, Meta's
@@ -151,7 +156,7 @@ changing the prompt.
 
 ## Explaining the run
 
-After training starts, module 04 and module 07 analyse the run as it happens:
+After training starts, step 04 and step 07 analyse the run as it happens:
 
 - Which of five learning stages it has reached — random, character statistics, words, local grammar,
   sentence structure — inferred from loss relative to uniform guessing plus statistics of the
@@ -204,7 +209,7 @@ src/
     huggingface.ts   hub search and dataset viewer loading
   store/        depth and theme, plus the one model shared between modules
   ui/           design system, charts, canvases, network diagram, panels
-  modules/      one file per course module
+  modules/      one file per walkthrough step
   content/      the ⓘ explanation registry
 ```
 
@@ -212,9 +217,9 @@ src/
 
 ---
 
-## Connecting your own model (module 06)
+## Connecting your own model (step 06)
 
-Module 06 talks to any OpenAI-compatible `/chat/completions` endpoint: the UVU AI Gateway, OpenAI,
+Step 06 talks to any OpenAI-compatible `/chat/completions` endpoint: the UVU AI Gateway, OpenAI,
 Azure, OpenRouter, Together, Groq, or a model running locally under Ollama or LM Studio.
 
 Your key is held in this browser's local storage and attached only to requests made to the base URL

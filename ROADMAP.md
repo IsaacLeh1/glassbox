@@ -24,8 +24,8 @@ than that in two specific ways:
 
 ## The Communication module — built
 
-Module 09. The loop described below now exists, operating on the model the
-user trained themselves in module 07.
+Step 09. The loop described below now exists, operating on the model the
+user trained themselves in step 07.
 
 - **See the matrices of their own custom-trained model.** Tab 1 lists every
   parameter tensor in the model with its shape, share of the total, a heatmap
@@ -46,11 +46,11 @@ user trained themselves in module 07.
   seed so any difference is attributable to what was changed.
 
 The prerequisite refactor is done: `store/model.ts` holds the one model, and
-module 07 publishes to it on build and again when training finishes.
+step 07 publishes to it on build and again when training finishes.
 
 ### What is still missing from it
 
-- Only module 09 reads the shared model. Modules 04 and 08 still build their
+- Only step 09 reads the shared model. Modules 04 and 08 still build their
   own, and should be pointed at the user's model with a fallback.
 - Teaching uses a plain fine-tune of the whole model. A frozen-base adapter
   (the LoRA idea already described in the ⓘ copy) would show the standard
@@ -66,35 +66,35 @@ The real order of work at a company that ships models:
 
 | Stage | Covered |
 |---|---|
-| 1. Define the problem and what success means | partly — module 10 opens by making you write it down |
-| 2. **Design the evaluation before training anything** | yes — module 10 |
-| 3. Source, licence, clean and deduplicate data | partly — module 07 loads real data, but does not clean or inspect it |
-| 4. Tokenizer decisions | yes — module 04 |
-| 5. Choose architecture and size against a compute budget | yes — modules 05 and 07 |
-| 6. Pretraining run, with monitoring and incident handling | yes — modules 05 and 07 |
-| 7. Evaluate against the held-out set | yes — module 10, with baselines and confidence intervals |
-| 8. Post-training: supervised fine-tuning, then preference optimisation | partly — module 09 fine-tunes; no preference optimisation |
-| 9. Safety work: red-teaming, guardrails, classifiers | partly — modules 08 and 09 cover mechanisms, not the process |
-| 10. Deploy: serving, quantisation, latency and cost per request | yes — module 11 |
-| 11. Monitor in production, collect feedback, decide when to retrain | yes — module 12 |
+| 1. Define the problem and what success means | partly — step 10 opens by making you write it down |
+| 2. **Design the evaluation before training anything** | yes — step 10 |
+| 3. Source, licence, clean and deduplicate data | partly — step 07 loads real data, but does not clean or inspect it |
+| 4. Tokenizer decisions | yes — step 04 |
+| 5. Choose architecture and size against a compute budget | yes — steps 05 and 07 |
+| 6. Pretraining run, with monitoring and incident handling | yes — steps 05 and 07 |
+| 7. Evaluate against the held-out set | yes — step 10, with baselines and confidence intervals |
+| 8. Post-training: supervised fine-tuning, then preference optimisation | partly — step 09 fine-tunes; no preference optimisation |
+| 9. Safety work: red-teaming, guardrails, classifiers | partly — steps 08 and 09 cover mechanisms, not the process |
+| 10. Deploy: serving, quantisation, latency and cost per request | yes — step 11 |
+| 11. Monitor in production, collect feedback, decide when to retrain | yes — step 12 |
 
 **Every stage of the lifecycle is now covered at least once**, and the loop
-closes: module 12 sends the reader back to module 10 to recheck the bar, to
-module 07 to retrain, or to module 09 to teach.
+closes: step 12 sends the reader back to step 10 to recheck the bar, to
+step 07 to retrain, or to step 09 to teach.
 
 Two stages are covered only in part, and both are worth finishing:
 
-- **Stage 8** &mdash; module 09 does supervised fine-tuning, but nothing covers
+- **Stage 8** &mdash; step 09 does supervised fine-tuning, but nothing covers
   preference optimisation, which is how a model is actually shaped after
   pretraining. A DPO-style pairwise preference exercise on the user's own
   model would complete it, and the machinery is mostly there already.
-- **Stage 3** &mdash; module 07 loads real data from Hugging Face and never
+- **Stage 3** &mdash; step 07 loads real data from Hugging Face and never
   inspects it. Deduplication, licence checking and a look at what is actually
   in the corpus is a real day of work at a real company and currently absent.
 
 ---
 
-## Notes from module 12
+## Notes from step 12
 
 Monitoring needed a proxy signal that genuinely moves, not one asserted to.
 It does: a model trained on the stories corpus is measurably more surprised by
@@ -113,7 +113,7 @@ the reader to hide it again.
 
 ---
 
-## Notes from module 11
+## Notes from step 11
 
 Quantisation is applied for real, so the quality cost is genuine, but the
 engine computes in Float64 throughout and has no integer kernels. The speed
@@ -127,7 +127,7 @@ zero. The arithmetic is identical at any size; only the shapes change.
 
 ---
 
-## A finding from module 10, worth remembering
+## A finding from step 10, worth remembering
 
 The built-in corpora are generated from a small template grammar, so the
 held-out split is drawn from exactly the same distribution as the training
@@ -136,7 +136,7 @@ the same on both, and the contamination gap everyone expects does not appear.
 
 This was found by asserting that gap in a test, watching it pass on one seed,
 then measuring it properly across three training lengths and two sample sizes,
-where it was consistently absent or slightly reversed. Module 10 now measures
+where it was consistently absent or slightly reversed. Step 10 now measures
 the split rather than claiming it, and demonstrates contamination by
 fine-tuning directly on the test cases instead, which moves the score from
 about 40 percent to about 90 percent and is reversible.
@@ -149,7 +149,7 @@ should appear on its own and that copy can be revisited.
 ## Constraints that apply to anything added here
 
 - Everything computes for real. The only simulated thing in the application is
-  the per-device cluster telemetry in module 05, and it is labelled as such.
+  the per-device cluster telemetry in step 05, and it is labelled as such.
   Do not add a second exception quietly.
 - Every adjustable control gets an ⓘ entry in `src/content/varInfo.ts` with
   what it is and what happens in both directions.
