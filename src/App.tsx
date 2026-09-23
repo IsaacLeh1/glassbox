@@ -1,6 +1,6 @@
 import { Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
-import { DepthSwitch, Badge } from './ui/kit';
+import { useEffect, type ReactElement } from 'react';
+import { DepthSwitch, Badge, Keep } from './ui/kit';
 import { useApp } from './store/app';
 import Home from './modules/Home';
 import NeuronLab from './modules/NeuronLab';
@@ -269,9 +269,26 @@ function StepNav() {
   );
 }
 
+/** One element per step, so a step can be kept mounted across navigation. */
+const VIEWS: Record<string, ReactElement> = {
+  '/neuron': <NeuronLab />,
+  '/matrix': <MatrixLab />,
+  '/training': <TrainingLab />,
+  '/llm': <LLMLab />,
+  '/cluster': <ClusterLab />,
+  '/dspy': <DSPyLab />,
+  '/studio': <StudioLab />,
+  '/guardrails': <GuardrailsLab />,
+  '/comms': <CommsLab />,
+  '/evals': <EvalLab />,
+  '/deploy': <DeployLab />,
+  '/monitor': <MonitorLab />,
+};
+
 export default function App() {
   const loc = useLocation();
   const markVisited = useApp((s) => s.markVisited);
+  const atStep = STEPS.some((s) => loc.pathname.startsWith(s.path));
 
   useEffect(() => {
     const m = STEPS.find((x) => loc.pathname.startsWith(x.path));
@@ -284,22 +301,23 @@ export default function App() {
       <main className="flex min-w-0 flex-1 flex-col">
         <Topbar />
         <div className="min-h-0 flex-1 overflow-y-auto">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/neuron" element={<NeuronLab />} />
-            <Route path="/matrix" element={<MatrixLab />} />
-            <Route path="/training" element={<TrainingLab />} />
-            <Route path="/llm" element={<LLMLab />} />
-            <Route path="/cluster" element={<ClusterLab />} />
-            <Route path="/dspy" element={<DSPyLab />} />
-            <Route path="/studio" element={<StudioLab />} />
-            <Route path="/guardrails" element={<GuardrailsLab />} />
-            <Route path="/comms" element={<CommsLab />} />
-            <Route path="/evals" element={<EvalLab />} />
-            <Route path="/deploy" element={<DeployLab />} />
-            <Route path="/monitor" element={<MonitorLab />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+          {/* Steps are kept mounted once opened rather than swapped by the
+              router, because unmounting throws away everything the reader
+              did there: a dataset pulled from Hugging Face, a half-finished
+              lab programme, a trained model. Nothing mounts until it is
+              first visited, so unopened steps cost nothing. */}
+          {atStep ? (
+            STEPS.map((s) => (
+              <Keep key={s.path} when={loc.pathname.startsWith(s.path)}>
+                {VIEWS[s.path]}
+              </Keep>
+            ))
+          ) : (
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          )}
           <StepNav />
         </div>
       </main>

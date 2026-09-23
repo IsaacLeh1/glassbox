@@ -21,6 +21,7 @@ import {
   fmt,
   fmtPct,
   signedTextColor,
+  Keep,
 } from '../ui/kit';
 import { V } from '../content/varInfo';
 import { FieldCanvas, HeatGrid } from '../ui/viz';
@@ -628,7 +629,8 @@ export default function NeuronLab() {
           Nothing here is trained yet. These are the weights the model starts life with.
         </p>
       </div>
-      {stage === 'one' ? <SingleNeuron /> : <NetworkExplorer />}
+      <Keep when={stage === 'one'}><SingleNeuron /></Keep>
+      <Keep when={stage === 'net'}><NetworkExplorer /></Keep>
     </div>
   );
 }

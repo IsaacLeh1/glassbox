@@ -24,6 +24,7 @@ import {
   fmt,
   fmtPct,
   signedTextColor,
+  Keep,
 } from '../ui/kit';
 import { V } from '../content/varInfo';
 import { FieldCanvas, LineChart, type Series } from '../ui/viz';
@@ -992,7 +993,10 @@ export default function TrainingLab() {
           ]}
         />
       </div>
-      {tab === 'train' ? <TrainTab /> : tab === 'backprop' ? <BackpropTab /> : <FailureTab />}
+      {/* Kept mounted: switching tab used to discard a trained model. */}
+      <Keep when={tab === 'train'}><TrainTab /></Keep>
+      <Keep when={tab === 'backprop'}><BackpropTab /></Keep>
+      <Keep when={tab === 'fail'}><FailureTab /></Keep>
     </div>
   );
 }

@@ -716,3 +716,25 @@ export function BackgroundNotice({ running }: { running: boolean }) {
     </span>
   );
 }
+
+/**
+ * Render children once they have been shown, then keep them mounted.
+ *
+ * React destroys a component's state the moment it stops being rendered, so
+ * swapping a tab or moving to the next step threw away everything the reader
+ * had done: a dataset pulled from Hugging Face, half a lab programme, a
+ * trained model. Coming back gave them an empty form and no explanation.
+ *
+ * Inactive children stay in the tree with `display: none`. Nothing is
+ * mounted until it is first opened, so an untouched step costs nothing, and
+ * the charts floor their measured width rather than collapsing to zero while
+ * hidden, so they redraw correctly on the way back.
+ */
+export function Keep({ when, children }: { when: boolean; children: React.ReactNode }) {
+  // Written during render deliberately: it is a one-way latch that depends
+  // only on whether this child has ever been visible, so it is idempotent.
+  const seen = React.useRef(when);
+  if (when) seen.current = true;
+  if (!seen.current) return null;
+  return <div style={{ display: when ? undefined : 'none' }}>{children}</div>;
+}

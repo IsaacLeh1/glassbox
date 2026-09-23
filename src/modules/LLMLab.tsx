@@ -27,6 +27,7 @@ import {
   InfoDot,
   fmt,
   fmtInt,
+  Keep,
 } from '../ui/kit';
 import { V } from '../content/varInfo';
 import { BarMeter, HeatGrid, LineChart, type Series } from '../ui/viz';
@@ -939,15 +940,10 @@ export default function LLMLab() {
         {corpus.blurb}
       </p>
 
-      {tab === 'tok' ? (
-        <TokenizerTab {...ctx} />
-      ) : tab === 'fwd' ? (
-        <ForwardTab {...ctx} />
-      ) : tab === 'train' ? (
-        <TrainTab {...ctx} corpusId={corpusId} />
-      ) : (
-        <GenerateTab {...ctx} />
-      )}
+      <Keep when={tab === 'tok'}><TokenizerTab {...ctx} /></Keep>
+      <Keep when={tab === 'fwd'}><ForwardTab {...ctx} /></Keep>
+      <Keep when={tab === 'train'}><TrainTab {...ctx} corpusId={corpusId} /></Keep>
+      <Keep when={tab === 'gen'}><GenerateTab {...ctx} /></Keep>
     </div>
   );
 }

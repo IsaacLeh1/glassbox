@@ -36,6 +36,7 @@ import {
   Stat,
   fmt,
   fmtInt,
+  Keep,
 } from '../ui/kit';
 import { V } from '../content/varInfo';
 import { BarMeter, LineChart, type Series } from '../ui/viz';
@@ -289,9 +290,13 @@ export default function ClusterLab() {
         </div>
 
         <div className="space-y-4">
-          {tab === 'frontier' ? (
+          {/* Frontier keeps its own preset and weight tweaks; the other two
+              branches read only from this component's state, so they are
+              safe to rebuild. */}
+          <Keep when={tab === 'frontier'}>
             <FrontierTab spec={spec} onSpec={setSpec} />
-          ) : tab === 'plan' ? (
+          </Keep>
+          {tab === 'plan' ? (
             <>
               <Panel title="Capacity plan" subtitle="Computed from the specification on the left, not looked up">
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">

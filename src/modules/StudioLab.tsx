@@ -42,6 +42,7 @@ import {
   Stat,
   fmt,
   fmtInt,
+  Keep,
 } from '../ui/kit';
 import { BarMeter, LineChart, type Series } from '../ui/viz';
 import CompareTab from './CompareTab';
@@ -335,7 +336,7 @@ export default function StudioLab() {
       </div>
 
       {/* ========================================================= the programme */}
-      {tab === 'lab' && <LabRun />}
+      <Keep when={tab === 'lab'}><LabRun /></Keep>
 
       {/* ================================================================ data */}
       {tab === 'data' && (
@@ -1031,7 +1032,9 @@ export default function StudioLab() {
       )}
 
       {/* ============================================================= compare */}
-      {tab === 'compare' && <CompareTab built={built} measuredTokPerSec={measuredTokPerSec} />}
+      <Keep when={tab === 'compare'}>
+        <CompareTab built={built} measuredTokPerSec={measuredTokPerSec} />
+      </Keep>
     </div>
   );
 }

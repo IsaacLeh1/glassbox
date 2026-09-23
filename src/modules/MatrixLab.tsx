@@ -24,6 +24,7 @@ import {
   fmtInt,
   signedColor,
   signedTextColor,
+  Keep,
 } from '../ui/kit';
 import { V } from '../content/varInfo';
 import { BarMeter, HeatGrid } from '../ui/viz';
@@ -1029,13 +1030,9 @@ export default function MatrixLab() {
         )}
       </div>
 
-      {tab === 'hand' ? (
-        <ByHandTab />
-      ) : tab === 'words' ? (
-        <WordsTab trainer={trainerRef.current} />
-      ) : (
-        <ScaleTab trainer={trainerRef.current} />
-      )}
+      <Keep when={tab === 'hand'}><ByHandTab /></Keep>
+      <Keep when={tab === 'words'}><WordsTab trainer={trainerRef.current} /></Keep>
+      <Keep when={tab === 'scale'}><ScaleTab trainer={trainerRef.current} /></Keep>
     </div>
   );
 }
