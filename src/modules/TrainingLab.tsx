@@ -586,7 +586,7 @@ function BackpropTab() {
               <Slider label="x₂" info={V.probeInput} value={x2} min={-2} max={2} onChange={setX2} tone="signed" />
               <Slider label="w₁" info={V.weight1} value={w1} min={-2} max={2} onChange={setW1} tone="signed" />
               <Slider label="w₂" info={V.weight2} value={w2} min={-2} max={2} onChange={setW2} tone="signed" />
-              <Slider label="bias" value={b} min={-2} max={2} onChange={setB} tone="signed" />
+              <Slider label="bias" info={V.bias} value={b} min={-2} max={2} onChange={setB} tone="signed" />
               <Slider label="target y" info={V.targetY} value={y} min={-1} max={1} step={0.1} onChange={setY} tone="signed" />
             </div>
           </Panel>

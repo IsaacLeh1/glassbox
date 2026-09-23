@@ -319,8 +319,11 @@ export function buildStages(trace: Trace, cfg: TransformerConfig): Stage[] {
         `processed on its own, with no reference to any other. Each row is stretched from ${cfg.dModel} ` +
         `numbers out to ${cfg.dFF}, and anything that comes out negative is mostly flattened toward zero. ` +
         'That flattening is the only place in the whole block where something non-linear happens, and ' +
-        'without it the entire stack would collapse into a single matrix multiply. This is also where ' +
-        'most of a real model\'s weights live, and where most of its factual recall is thought to sit.',
+        'without it the entire stack would collapse into a single matrix multiply. In a full-sized model ' +
+        'this part is four times the width of the residual stream, rather than the ' +
+        `${(cfg.dFF / cfg.dModel).toFixed(1)} times it is here, which is why most of a real model's ` +
+        'weights sit in it and why most of its factual recall is thought to live here rather than in ' +
+        'attention. At this size the split is far more even, so do not expect your own model to show it.',
       math: 'F = \\operatorname{GELU}(\\hat{H} W_1 + b_1)',
       code: 'const ffHidden = gelu(add(matmul(ln2, B.w1.M), B.b1.M));',
     });
