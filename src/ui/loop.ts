@@ -1,16 +1,37 @@
 import { useEffect, useRef, useState } from 'react';
 
 /**
- * A frame loop that keeps running when the tab is in the background.
+ * A frame loop that keeps running when the browser stops painting.
  *
- * requestAnimationFrame is suspended entirely in a hidden tab, which would
- * silently freeze a training run the moment someone switches away. That is a
- * poor experience for a long job, so this falls back to a timer when hidden
- * and returns to the animation frame when the tab comes back.
+ * The obvious implementation is requestAnimationFrame, and it fails in a way
+ * that is hard to diagnose: a long training run simply stops, with no error
+ * and no indication why. There are several reasons a frame may never arrive,
+ * and `document.hidden` only covers one of them:
+ *
+ *  - the tab is in the background, which document.hidden does report,
+ *  - the window is behind another window, so nothing is being composited,
+ *  - the display has gone to sleep,
+ *  - the window is minimised.
+ *
+ * In every case but the first, `document.hidden` stays false while frames stop
+ * completely. So rather than trying to detect the cause, each cycle races the
+ * animation frame against a timer and takes whichever arrives first. When
+ * frames are flowing the timer never wins and this behaves exactly like a
+ * plain rAF loop; when they stop, the timer takes over and the run continues.
  *
  * The work done per tick is still bounded by the caller's own time budget, so
  * a background run uses no more CPU than a foreground one.
  */
+
+/**
+ * How long to wait for an animation frame before falling back to a timer.
+ * Comfortably longer than a 60Hz frame, so the timer does not win races on a
+ * healthy page, and short enough that a stalled run barely slows down. A
+ * genuinely hidden tab has its timers clamped to roughly one a second by the
+ * browser, which is slow but keeps the run alive rather than stopping it dead.
+ */
+const FALLBACK_MS = 32;
+
 export function useFrameLoop(active: boolean, onFrame: () => void) {
   const cb = useRef(onFrame);
   cb.current = onFrame;
@@ -23,35 +44,37 @@ export function useFrameLoop(active: boolean, onFrame: () => void) {
 
     const schedule = () => {
       if (stopped) return;
-      if (document.hidden) {
-        // Browsers clamp background timers to about once a second, which is
-        // slow but keeps the run alive rather than stopping it dead.
-        timerId = window.setTimeout(run, 16);
-      } else {
-        rafId = requestAnimationFrame(run);
-      }
+      let fired = false;
+      const fire = () => {
+        if (stopped || fired) return;
+        fired = true;
+        cancelAnimationFrame(rafId);
+        if (timerId !== undefined) clearTimeout(timerId);
+        run();
+      };
+      rafId = requestAnimationFrame(fire);
+      timerId = window.setTimeout(fire, FALLBACK_MS);
     };
 
     const run = () => {
       if (stopped) return;
-      cb.current();
-      schedule();
-    };
-
-    const onVisibility = () => {
-      // Cancel whichever scheduler is pending and pick the right one again.
-      cancelAnimationFrame(rafId);
-      if (timerId !== undefined) clearTimeout(timerId);
+      try {
+        cb.current();
+      } catch (err) {
+        // A throw used to freeze the loop silently, because the frame that
+        // failed never scheduled a successor. Stop deliberately and let the
+        // error surface, rather than leaving a run that merely looks slow.
+        stopped = true;
+        throw err;
+      }
       schedule();
     };
 
     schedule();
-    document.addEventListener('visibilitychange', onVisibility);
     return () => {
       stopped = true;
       cancelAnimationFrame(rafId);
       if (timerId !== undefined) clearTimeout(timerId);
-      document.removeEventListener('visibilitychange', onVisibility);
     };
   }, [active]);
 }

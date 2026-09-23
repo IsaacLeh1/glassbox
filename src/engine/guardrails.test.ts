@@ -62,6 +62,29 @@ describe('blocking tokens at sampling time', () => {
     expect(s.blockedMass).toBeCloseTo(1, 9);
   });
 
+  it('says which filter cut each token, not just that it was cut', () => {
+    // Regression: the UI assumed anything not kept had been cut by top-k, but
+    // with both limits on it is whichever binds first that actually cuts.
+    // LOGITS = [4,3,2,1,0]: the top two already cover 84% of the mass.
+    const s = sampleToken(LOGITS, { temperature: 1, topK: 4, topP: 0.8 }, mulberry32(1));
+    const cut = s.candidates.filter((c) => !c.kept);
+    expect(cut.length).toBeGreaterThan(0);
+    for (const c of cut) expect(c.cut).toBe('top-p');
+    for (const c of s.candidates.filter((x) => x.kept)) expect(c.cut).toBeUndefined();
+  });
+
+  it('attributes the cut to top-k when top-k is what binds', () => {
+    const s = sampleToken(LOGITS, { temperature: 1, topK: 2, topP: 1 }, mulberry32(1));
+    const cut = s.candidates.filter((c) => !c.kept);
+    expect(cut.length).toBe(3);
+    for (const c of cut) expect(c.cut).toBe('top-k');
+  });
+
+  it('a blocked token is reported as blocked rather than filtered', () => {
+    const s = sampleToken(LOGITS, { temperature: 1, topK: 0, topP: 1, banned: new Set([0]) }, mulberry32(1));
+    expect(s.candidates.find((c) => c.id === 0)!.cut).toBe('blocked');
+  });
+
   it('an empty ban list changes nothing', () => {
     const a = sampleToken(LOGITS, { temperature: 1, topK: 0, topP: 1 }, mulberry32(5));
     const b = sampleToken(LOGITS, { temperature: 1, topK: 0, topP: 1, banned: new Set() }, mulberry32(5));

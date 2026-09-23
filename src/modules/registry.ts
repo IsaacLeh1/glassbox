@@ -84,4 +84,13 @@ export const MODULES: ModuleDef[] = [
       'Five different mechanisms sit between a request and an answer, and only one of them is inside the model. Block tokens live, find a behaviour direction inside the network and push along it, and see why there is no list of rules anywhere in there.',
     minutes: 25,
   },
+  {
+    path: '/comms',
+    num: '09',
+    title: 'Communication',
+    tagline: 'Your own model, end to end, and every way to change it',
+    blurb:
+      'Open the model you trained yourself. Read its weights, give it a prompt, then scrub back and forth through the exact forward pass that produced every token. Edit a weight, switch an attention head off, apply a guardrail, or teach it something new, and re-run the identical prompt to see what changed.',
+    minutes: 35,
+  },
 ];

@@ -425,6 +425,87 @@ export const V = {
     down: 'Fewer trainable parameters, cheaper and faster, but less able to teach the model anything genuinely new.',
     note: 'Ranks between 8 and 64 cover almost all practical use, and still amount to a tiny fraction of the full model.',
   },
+
+  /* ---------------------------------------- module 09: communication -- */
+
+  commsPrompt: {
+    what: 'The text you hand the model. It is cut into tokens and becomes the only thing the model knows before it starts writing. There is no memory of anything you typed earlier and no instructions hidden underneath it.',
+    up: 'A longer prompt gives more to condition on, but once it passes the context limit the oldest tokens fall off the front and are simply gone. Nothing tells the model this happened.',
+    down: 'A short prompt leaves the model to fall back on whatever its training made most likely, so the reply drifts toward the general shape of its corpus rather than your subject.',
+    note: 'Words made of characters the model never saw in training are dropped on the way in. The panel names them when that happens.',
+  },
+  commsTokens: {
+    what: 'How many tokens to generate. Each one is a complete pass through the whole network, and each one is kept in full so you can walk back through it afterwards.',
+    up: 'A longer reply, and more to inspect. Every extra token costs another full forward pass and another stored trace, so memory and time both climb in a straight line.',
+    down: 'Faster and lighter. Very short replies can look better than the model deserves, because a small model usually holds together for a few tokens before it loses the thread.',
+    note: 'The estimated memory figure below the control is the real cost of keeping every intermediate, not a guess.',
+  },
+  commsTemperature: {
+    what: 'How flat or peaked the final choice is made before a token is drawn. The model always produces the same scores; this decides how literally to take them.',
+    up: 'Flattens the odds, so unlikely tokens get a real chance. The text gets more varied and less coherent, and past roughly 1.5 it mostly stops making sense.',
+    down: 'Sharpens toward the single most likely token. Near zero the model becomes deterministic and tends to repeat itself, because the safest continuation is often a loop.',
+    note: 'This happens after the model has finished. The weights are not consulted and nothing inside the network changes.',
+  },
+  commsTopK: {
+    what: 'Keep only this many of the highest-scoring tokens and ignore everything else. A hard cut before the draw.',
+    up: 'More candidates survive, so rarer words can appear. Set to zero the cut is off entirely and the whole vocabulary stays in play.',
+    down: 'Fewer candidates, so the output is safer and more repetitive. At one, the model always takes its top choice and is fully deterministic.',
+    note: 'Blocked tokens are removed before the count is taken, so k always means k tokens the sampler is actually allowed to pick.',
+  },
+  commsSeed: {
+    what: 'The starting number for the random draws. Same seed, same prompt, same weights gives the same reply every time.',
+    up: 'Any change at all produces a different reply. There is no ordering to the numbers; one seed is not warmer or colder than another.',
+    down: 'The same. What matters is only whether it is the same as last time.',
+    note: 'This is what lets you change one weight and be certain that any difference in the output came from the weight and not from luck.',
+  },
+  commsStage: {
+    what: 'Where you are standing in the forward pass. Every stage is one real step the model took, in the order it took them, for the token currently selected.',
+    up: 'Later in the computation. The information becomes less about which words are present and more about what the model intends to say next.',
+    down: 'Earlier, back toward the raw lookup of what each token means before anything has been done with it.',
+    note: 'Nothing is recomputed as you scrub. These are the numbers from the pass that already happened.',
+  },
+  commsToken: {
+    what: 'Which generated token to inspect. Each one was produced by its own complete pass through the network, with one more token of context than the last.',
+    up: 'Later in the reply, with more context to work from, including everything the model has already said. Its own earlier mistakes are part of what it is now reading.',
+    down: 'Earlier, closer to your prompt, where the model still has mostly your words to go on.',
+    note: 'A model that goes off the rails usually does so at one identifiable token. This is how you find it.',
+  },
+  commsCell: {
+    what: 'One single weight, picked out of the matrix. This is the smallest thing in the model it is possible to change: one number among the many thousands.',
+    up: 'Raises this one connection. A single weight in a trained model almost never matters on its own, which is itself the lesson: there is no dial in here labelled with a concept.',
+    down: 'Lowers it, and below zero it starts arguing the other way. Large values in either direction distort the row they sit in and can wreck the output.',
+    note: 'Change it, re-run the same prompt with the same seed, and any difference you see is caused by this number alone.',
+  },
+  commsScale: {
+    what: 'Multiply every number in the selected matrix by this factor at once. A blunt instrument, and a fast way to see what a whole part of the model was contributing.',
+    up: 'Above one, that part of the model shouts. Attention becomes sharper and more extreme, or the feed-forward output starts to swamp the residual stream.',
+    down: 'Below one, it whispers. At exactly zero the matrix is switched off entirely and you can see what the rest of the model does without it.',
+    note: 'Scaling is reversible here, but it is not something a real training run ever does. It is a probe, not a technique.',
+  },
+  commsAblate: {
+    what: 'Switch one attention head off completely, by zeroing the part of the output projection that reads from it. The head still computes; nothing it produces is allowed through.',
+    up: 'Not a slider. Switching a head off and comparing the two replies is how researchers work out what an individual head was for.',
+    down: 'Switching it back on restores the exact original weights, since the removed values were saved first.',
+    note: 'In a small model most heads have not specialised much, so many can be removed with barely any effect. That is itself worth seeing.',
+  },
+  commsTeachText: {
+    what: 'The examples you want the model to learn. Each line is treated as its own lesson and is chopped into next-token prediction problems, exactly as pretraining does.',
+    up: 'More examples give a more general lesson and are less likely to be memorised word for word. They also take proportionally longer.',
+    down: 'One short line will be learned quickly and almost certainly by rote. The model will reproduce it and will have understood nothing around it.',
+    note: 'The vocabulary was fixed before pretraining and cannot grow now, so characters the model has never seen are dropped. The panel lists any it had to drop.',
+  },
+  commsTeachLr: {
+    what: 'How large a step to take for each example while teaching. The same learning rate as in pretraining, but applied to a model that already knows things.',
+    up: 'Learns the new material faster, and damages what it already knew faster too. Too high and the model is destroyed in a handful of steps.',
+    down: 'Gentler. The lesson takes longer to stick but the rest of the model survives better. This is why real fine-tuning uses a far smaller rate than pretraining did.',
+    note: 'Watch both curves. The lesson loss falling while the original loss climbs is catastrophic forgetting, happening in front of you.',
+  },
+  commsTeachEpochs: {
+    what: 'How many times to go over your examples. One pass rarely shifts anything; many passes will drill them in.',
+    up: 'The lesson sticks harder, and eventually the model will simply recite your examples back. Everything it knew before degrades along the way.',
+    down: 'A lighter touch that nudges the model without rewriting it. Fewer passes leave more of the original behaviour intact.',
+    note: 'Every change here can be undone exactly, because the weights were copied before the first step.',
+  },
 } satisfies Record<string, VarInfo>;
 
 export type VarKey = keyof typeof V;

@@ -294,6 +294,19 @@ export class Transformer {
     const T = tokens.length;
     const dh = this.dHead;
 
+    // There are only blockSize rows in the position table. Reading past the
+    // end of it returns undefined, which turns the entire forward pass into
+    // NaN without anything appearing to go wrong -- the loss becomes NaN, the
+    // gradients become NaN, and the model quietly stops learning. Callers are
+    // expected to window their input; failing loudly here is what makes a
+    // missing window findable instead of mysterious.
+    if (T > this.cfg.blockSize) {
+      throw new RangeError(
+        `forward() got ${T} tokens but this model has only ${this.cfg.blockSize} positions. ` +
+          'Window the input to the last blockSize tokens first.',
+      );
+    }
+
     const tokenEmb = mat(T, dModel);
     const posEmb = mat(T, dModel);
     for (let t = 0; t < T; t++) {
@@ -547,8 +560,24 @@ export interface SampleConfig {
   banned?: Set<number>;
 }
 
+/** Why a token did not survive to the draw. */
+export type CutReason = 'top-k' | 'top-p' | 'blocked';
+
 export interface SampleStep {
-  candidates: { id: number; logit: number; prob: number; kept: boolean; blocked: boolean }[];
+  candidates: {
+    id: number;
+    logit: number;
+    prob: number;
+    kept: boolean;
+    blocked: boolean;
+    /**
+     * Which filter removed it, or undefined if it survived. Worth recording
+     * rather than inferring: with top-k and top-p both on, whichever binds
+     * first is the one that actually did the cutting, and guessing from the
+     * settings alone gets it wrong.
+     */
+    cut?: CutReason;
+  }[];
   chosen: number;
   /** Probability mass the ban removed, before renormalising. */
   blockedMass: number;
@@ -588,13 +617,25 @@ export function sampleToken(logits: number[], cfg: SampleConfig, rand: () => num
     .filter((c) => !cfg.banned?.has(c.id))
     .sort((a, b) => b.pr - a.pr);
   const keep = new Set<number>();
+  const cutBy = new Map<number, CutReason>();
   let cumulative = 0;
   const limit = cfg.topK > 0 ? Math.min(cfg.topK, order.length) : order.length;
-  for (let i = 0; i < limit; i++) {
+  let stoppedByP = false;
+  let i = 0;
+  for (; i < limit; i++) {
     keep.add(order[i].id);
     cumulative += order[i].pr;
     // top-p stops as soon as the kept set covers p of the probability mass.
-    if (cfg.topP > 0 && cfg.topP < 1 && cumulative >= cfg.topP) break;
+    if (cfg.topP > 0 && cfg.topP < 1 && cumulative >= cfg.topP) {
+      stoppedByP = true;
+      i++;
+      break;
+    }
+  }
+  // Everything past where the loop stopped was cut, and the reason is
+  // whichever of the two limits the loop actually hit.
+  for (let j = i; j < order.length; j++) {
+    cutBy.set(order[j].id, stoppedByP ? 'top-p' : 'top-k');
   }
 
   let norm = 0;
@@ -617,6 +658,7 @@ export function sampleToken(logits: number[], cfg: SampleConfig, rand: () => num
       prob: probs[id],
       kept: keep.has(id),
       blocked: cfg.banned?.has(id) ?? false,
+      cut: cfg.banned?.has(id) ? ('blocked' as CutReason) : cutBy.get(id),
     })),
     chosen,
     blockedMass,

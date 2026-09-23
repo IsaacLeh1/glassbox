@@ -11,6 +11,7 @@ import ClusterLab from './modules/ClusterLab';
 import DSPyLab from './modules/DSPyLab';
 import StudioLab from './modules/StudioLab';
 import GuardrailsLab from './modules/GuardrailsLab';
+import CommsLab from './modules/CommsLab';
 import { MODULES } from './modules/registry';
 
 function Logo() {
@@ -216,6 +217,7 @@ export default function App() {
             <Route path="/dspy" element={<DSPyLab />} />
             <Route path="/studio" element={<StudioLab />} />
             <Route path="/guardrails" element={<GuardrailsLab />} />
+            <Route path="/comms" element={<CommsLab />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>

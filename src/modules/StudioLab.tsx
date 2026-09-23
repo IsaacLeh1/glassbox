@@ -10,6 +10,7 @@ import {
 } from '../data/huggingface';
 import { CORPORA, getCorpus } from '../engine/corpus';
 import { DEFAULT_LM_TRAIN, LMTrainer } from '../engine/lmTrainer';
+import { useModel } from '../store/model';
 import { DEFAULT_TCONFIG, sampleToken, type TransformerConfig } from '../engine/transformer';
 import { mulberry32 } from '../engine/tensor';
 import {
@@ -87,6 +88,10 @@ interface Corpus {
 
 export default function StudioLab() {
   const [tab, setTab] = useState<Tab>('data');
+
+  // Whatever is built here becomes the model the rest of the course uses.
+  const publish = useModel((s) => s.publish);
+  const republish = useModel((s) => s.publish);
 
   /* ------------------------------------------------------------ machine */
   const machine = useMemo(() => detectMachine(), []);
@@ -246,6 +251,14 @@ export default function StudioLab() {
           merges,
         );
         setBuilt(t);
+        publish(t, {
+          label: `${corpus.label} - ${dModel}d x ${nLayers}L`,
+          source: corpus.source,
+          chars: corpus.text.length,
+          steps: 0,
+          finalLoss: NaN,
+          trainedAt: Date.now(),
+        });
         setTab('train');
       } catch (e) {
         setErr(e instanceof Error ? e.message : String(e));
@@ -276,6 +289,16 @@ export default function StudioLab() {
     if (n === 0 || built.status === 'done') {
       setRunning(false);
       setSamples((s) => [...s, { step: built.step, text: generate(built) }]);
+      // Refresh the shared copy so other modules see the trained loss, not the
+      // placeholder recorded when the model was first built.
+      republish(built, {
+        label: `${corpus.label} - ${dModel}d x ${nLayers}L`,
+        source: corpus.source,
+        chars: corpus.text.length,
+        steps: built.step,
+        finalLoss: built.latest()?.loss ?? NaN,
+        trainedAt: Date.now(),
+      });
     } else if (Math.floor(built.step / 50) > Math.floor(before / 50)) {
       setSamples((s) => [...s, { step: built.step, text: generate(built) }]);
     }

@@ -187,3 +187,38 @@ export function randMat(rows: number, cols: number, rand: () => number, gain = 1
   for (let i = 0; i < m.data.length; i++) m.data[i] = (rand() * 2 - 1) * limit;
   return m;
 }
+
+/** Summary statistics of a flat buffer, for describing a weight matrix. */
+export interface BufStats {
+  n: number;
+  mean: number;
+  std: number;
+  min: number;
+  max: number;
+  /** Share of entries within 0.01 of zero, which is how sparse a matrix looks. */
+  nearZero: number;
+}
+
+export function statsOf(d: Float64Array): BufStats {
+  let mean = 0;
+  let min = Infinity;
+  let max = -Infinity;
+  let nearZero = 0;
+  for (let i = 0; i < d.length; i++) {
+    mean += d[i];
+    if (d[i] < min) min = d[i];
+    if (d[i] > max) max = d[i];
+    if (Math.abs(d[i]) < 0.01) nearZero++;
+  }
+  mean /= Math.max(1, d.length);
+  let v = 0;
+  for (let i = 0; i < d.length; i++) v += (d[i] - mean) ** 2;
+  return {
+    n: d.length,
+    mean,
+    std: Math.sqrt(v / Math.max(1, d.length)),
+    min,
+    max,
+    nearZero: d.length > 0 ? nearZero / d.length : 0,
+  };
+}

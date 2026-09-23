@@ -27,6 +27,7 @@ pnpm dev
 | 06 | **Optimizing prompts** | Connect your own model, measure it on a task, then let a DSPy optimizer rewrite the prompt and pick its own examples. Compare before and after example by example, and export the equivalent real Python. |
 | 07 | **Build your own** | Pull a dataset live from Hugging Face, design a transformer to your own specification, pick a compute device, set a RAM and CPU budget your machine can live with, train it, and measure yourself against a real GPU cluster. |
 | 08 | **Guardrails** | Five mechanisms sit between a request and an answer and only one is inside the model. Block tokens live and watch the model route around them, find a behaviour direction inside the network and push along it, and see why there is no list of rules in there. |
+| 09 | **Communication** | Open the model you trained in module 07. Read its weights, give it a prompt, then scrub back and forth through the exact forward pass behind every token it produced, with a logit lens showing what it would have said if it had stopped early. Then edit a weight, switch an attention head off, apply a guardrail or teach it something new, and re-run the identical prompt to see what changed. |
 
 Every explanation is written three times. A switch in the sidebar toggles the whole application
 between **Plain** (no notation at all), **Math** (the equation behind the step you are looking at)
@@ -58,6 +59,14 @@ This is the part that matters, so it is stated precisely.
   the CPU before it is trusted, and benchmarked end to end including transfer cost.
 - **Activation steering** by difference-in-means, the same technique used to locate refusal directions
   in published interpretability work, running live on the in-browser model.
+- A **replayable forward pass**: every intermediate of every generated token is kept, ordered
+  into the stages the model actually computed, and scrubbed through without recomputing it.
+- The **logit lens**: a half-finished residual stream pushed through the final norm and the output
+  head, using the model's own weights, to show what it was leaning toward partway through.
+- **Head ablation** by zeroing the rows of the output projection that read from one head, which is
+  how interpretability work establishes what an individual head contributes.
+- **Fine-tuning** an already-trained model on your own examples, with loss on the original corpus
+  measured alongside so catastrophic forgetting is visible rather than asserted.
 - **Token-level blocking**, including the awkward part: a word is usually not one token, so the panel
   shows exactly which pieces get struck out and warns when that over-blocks.
 - The DSPy reimplementation: signatures, the `[[ ## field ## ]]` chat adapter format,
@@ -158,6 +167,10 @@ src/
     resources.ts    machine detection and memory accounting
     compute.ts      WebGPU device detection, WGSL matmul, benchmarks
     diagnostics.ts  analysis of a live training run
+    replay.ts       a forward pass flattened into scrubbable stages, plus the logit lens
+    converse.ts     generation that keeps every trace, for replay
+    finetune.ts     teaching a trained model, with a forgetting measurement
+    steering.ts     difference-in-means directions and token ban resolution
   sim/
     cluster.ts    capacity planning (real) + device telemetry (simulated)
   dspy/
@@ -167,6 +180,7 @@ src/
     export.ts     emits real Python DSPy
   data/
     huggingface.ts   hub search and dataset viewer loading
+  store/        depth and theme, plus the one model shared between modules
   ui/           design system, charts, canvases, network diagram, panels
   modules/      one file per course module
   content/      the ⓘ explanation registry
@@ -197,7 +211,7 @@ set `OLLAMA_ORIGINS`.
 pnpm test
 ```
 
-175 tests. The ones worth knowing about:
+213 tests. The ones worth knowing about:
 
 - Analytic gradients checked against central finite differences for the MLP (all three task types,
   with and without L2) and for **every tensor** in the transformer.
@@ -207,11 +221,22 @@ pnpm test
   so the diagrams can never drift from the implementation.
 - Every prompt optimizer verified never to return a program that scored worse than the baseline.
 - Formatting tested not to print a misleading `0.0 s` or `$0.00`.
-- Regression tests for six real bugs found during development: a repeat detector that called any
+- The stage list for a forward pass asserted to be exactly what the config predicts, to visit blocks
+  in order, to hand out the model's own matrices rather than copies, and to have the shape each
+  stage claims.
+- A conversation verified to grow its context by one token per step, to condition each step on what
+  the last one chose, to be reproducible under a fixed seed, and to never exceed the context window.
+- Fine-tuning verified to lower the loss on what it is taught and to be undoable weight for weight.
+- Regression tests for ten real bugs found during development: a repeat detector that called any
   coincidental word alignment a loop; a diagnostic that scored samples against an empty corpus; a
   warmup schedule that gave step zero a learning rate of exactly zero; a banned token that could
   still occupy a top-k slot; an energy figure inflated a thousandfold by a stray unit conversion;
-  and a training loop interruptible only between whole steps, which froze the page at long context.
+  a training loop interruptible only between whole steps, which froze the page at long context;
+  a forward pass that read past the end of the position table and turned silently into NaN instead
+  of failing; a sampler that could not say which of top-k and top-p had actually cut a token; a
+  vocabulary check that blamed the user for a newline it had inserted itself; and a frame loop that
+  detected a stalled page by `document.hidden` alone, so any run froze silently whenever the window
+  was merely behind another one.
 
 ---
 

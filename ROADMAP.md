@@ -1,14 +1,14 @@
 # Roadmap
 
-Captured direction, **not implemented**. Recorded here so the intent survives
-between working sessions.
+Captured direction. Recorded here so the intent survives between working
+sessions.
 
 ---
 
 ## The goal, restated
 
-Glassbox today explains how an AI system works. The intended destination is
-larger than that in two specific ways:
+Glassbox explains how an AI system works. The intended destination is larger
+than that in two specific ways:
 
 1. **Walk the user through the exact process a professional enterprise
    business follows to produce a model** — the whole lifecycle, in order, at a
@@ -22,53 +22,49 @@ larger than that in two specific ways:
 
 ---
 
-## The missing centrepiece: a Communication module
+## The Communication module — built
 
-An all-inclusive loop in one place, operating on the model the user trained
-themselves in module 07. Today the pieces are spread across modules and each
-uses its own model; this would unify them around a single model the user owns.
+Module 09. The loop described below now exists, operating on the model the
+user trained themselves in module 07.
 
-What it needs to do, in order:
+- **See the matrices of their own custom-trained model.** Tab 1 lists every
+  parameter tensor in the model with its shape, share of the total, a heatmap
+  of the actual values, and what that tensor is for in plain language.
+- **Give it a prompt and watch it processed.** Tab 2 generates, keeping a full
+  trace per token, and reports how confident the model was at each one and
+  what it nearly said instead.
+- **Scroll back and forth through that process.** Tab 3 is the scrubber:
+  `7 + layers x (7 + 3 x heads)` ordered stages per token, a banded timeline,
+  arrow keys, play and pause. Nothing is recomputed — these are the numbers
+  from the pass that already happened.
+- **See the output**, connected to the internals, with a logit lens on every
+  residual stage showing what the model would have said had it stopped there.
+- **Intervene, in the same place.** Tab 4: edit any single weight, scale a
+  whole matrix, switch an attention head off, block words, steer along a
+  difference-in-means direction, or teach it new examples. Every change is
+  reversible, and a run log re-runs the identical prompt under the identical
+  seed so any difference is attributable to what was changed.
 
-- **See the matrices of their own custom-trained model.** Not a generic
-  example — the actual weights that came out of their run.
-- **Give it a prompt and watch it processed live**, inside the model, as it
-  happens.
-- **Scroll back and forth through that process.** A timeline or scrubber over
-  every stage of the forward pass, so nothing has to be caught in real time.
-  This is the part that does not exist anywhere yet: current panels show a
-  static forward pass, not a replayable one.
-- **See the output**, connected visibly to the internals that produced it.
-- **Then intervene, in the same place:**
-  - modify weights directly and re-run,
-  - apply or remove guardrails,
-  - teach it something new.
+The prerequisite refactor is done: `store/model.ts` holds the one model, and
+module 07 publishes to it on build and again when training finishes.
 
-The important property is that it is one continuous loop — observe, intervene,
-re-observe — rather than separate exercises. That loop is the thing that builds
-fluency.
+### What is still missing from it
 
-### Notes toward building it
-
-- Module 04 already produces a full `Trace` for every forward pass, containing
-  every intermediate. A scrubber is mostly a UI problem over data that already
-  exists, plus retaining traces per generated token rather than discarding them.
-- Module 08 already has real token blocking and real activation steering, and
-  both take a model as an argument. They should point at the user's model.
-- "Teach it something new" means a short fine-tune on user-supplied examples
-  against the existing weights, not a fresh run. The trainer supports resuming;
-  it needs a UI and a way to add examples.
-- Sharing one trained model across modules means lifting it out of per-module
-  refs into a store. That refactor should come first, or it will have to be
-  undone later.
+- Only module 09 reads the shared model. Modules 04 and 08 still build their
+  own, and should be pointed at the user's model with a fallback.
+- Teaching uses a plain fine-tune of the whole model. A frozen-base adapter
+  (the LoRA idea already described in the ⓘ copy) would show the standard
+  industrial answer to the forgetting problem the module demonstrates.
+- The scrubber replays one token at a time. Scrubbing across tokens *and*
+  stages on one timeline would show the context window sliding.
 
 ---
 
-## The enterprise lifecycle, and what is already covered
+## The enterprise lifecycle, and what is covered
 
-The real order of work at a company that ships models, with current coverage:
+The real order of work at a company that ships models:
 
-| Stage | Covered today |
+| Stage | Covered |
 |---|---|
 | 1. Define the problem and what success means | no |
 | 2. **Design the evaluation before training anything** | no |
@@ -77,14 +73,14 @@ The real order of work at a company that ships models, with current coverage:
 | 5. Choose architecture and size against a compute budget | yes — modules 05 and 07 |
 | 6. Pretraining run, with monitoring and incident handling | yes — modules 05 and 07 |
 | 7. Evaluate against the held-out set | partly — loss and perplexity only, no task evals |
-| 8. Post-training: supervised fine-tuning, then preference optimisation | no |
-| 9. Safety work: red-teaming, guardrails, classifiers | partly — module 08 covers mechanisms, not the process |
+| 8. Post-training: supervised fine-tuning, then preference optimisation | partly — module 09 fine-tunes; no preference optimisation |
+| 9. Safety work: red-teaming, guardrails, classifiers | partly — modules 08 and 09 cover mechanisms, not the process |
 | 10. Deploy: serving, quantisation, latency and cost per request | no |
 | 11. Monitor in production, collect feedback, decide when to retrain | no |
 
-The largest gaps are **2, 8, 10 and 11**. Of those, designing the evaluation
-first is the one most worth adding: it is the step beginners skip and
-professionals never do, and it reframes everything downstream.
+The largest remaining gaps are **2, 10 and 11**. Of those, designing the
+evaluation first is the one most worth adding: it is the step beginners skip
+and professionals never do, and it reframes everything downstream.
 
 ---
 
@@ -98,3 +94,6 @@ professionals never do, and it reframes everything downstream.
 - Plain depth is written for someone who knows nothing, with no undefined
   jargon at that level.
 - Callout and info boxes have no coloured left accent bar.
+- `engine/` imports nothing from `ui/`.
+- Anything exported from a component file breaks Fast Refresh. Shared helpers
+  belong in `engine/` or `content/`.
