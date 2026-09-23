@@ -18,6 +18,7 @@ import {
 import { LineChart } from '../ui/viz';
 import { V } from '../content/varInfo';
 import { useModel } from '../store/model';
+import { useWork } from '../store/work';
 import { useFrameLoop } from '../ui/loop';
 import { CORPORA, getCorpus } from '../engine/corpus';
 import { DEFAULT_LM_TRAIN, LMTrainer } from '../engine/lmTrainer';
@@ -42,6 +43,7 @@ import {
   dataGate,
   gate,
   inspectData,
+  nextStage,
   planScaling,
   scalingGate,
   type Check,
@@ -132,22 +134,30 @@ function StageHead({ n, title, owner, blurb }: { n: number; title: string; owner
 export default function LabRun() {
   const publish = useModel((s) => s.publish);
 
-  const [done, setDone] = useState<StageId[]>([]);
-  const [open, setOpen] = useState<StageId>('charter');
+  /* Everything typed or chosen here survives a reload. Only the trained
+     model does not, for the reasons in store/work.ts. */
+  const lab = useWork((w) => w.lab);
+  const setLab = useWork((w) => w.setLab);
+  const resetLab = useWork((w) => w.resetLab);
+
+  const done = lab.done;
+  const [open, setOpen] = useState<StageId>(() => nextStage(lab.done)?.id ?? 'launch');
   const sign = (id: StageId) => {
-    setDone((d) => (d.includes(id) ? d : [...d, id]));
+    setLab({ done: lab.done.includes(id) ? lab.done : [...lab.done, id] });
     const i = STAGES.findIndex((s) => s.id === id);
     if (i < STAGES.length - 1) setOpen(STAGES[i + 1].id);
   };
 
   /* 1 charter */
-  const [purpose, setPurpose] = useState('');
-  const [users, setUsers] = useState('');
-  const [success, setSuccess] = useState('');
+  const { purpose, users, success } = lab;
+  const setPurpose = (v: string) => setLab({ purpose: v });
+  const setUsers = (v: string) => setLab({ users: v });
+  const setSuccess = (v: string) => setLab({ success: v });
 
   /* 2 data */
-  const [corpusId, setCorpusId] = useState('stories');
-  const [licence, setLicence] = useState<Licence>('unknown');
+  const { corpusId, licence } = lab;
+  const setCorpusId = (v: string) => setLab({ corpusId: v });
+  const setLicence = (v: Licence) => setLab({ licence: v });
   const raw = useMemo(() => getCorpus(corpusId, 12), [corpusId]);
   // The last tenth is held back before anything else happens, so the
   // decontamination check has something honest to check against.
@@ -159,16 +169,18 @@ export default function LabRun() {
   const gData = useMemo(() => dataGate(report, licence, 2000), [report, licence]);
 
   /* 3 scaling */
-  const [budgetExp, setBudgetExp] = useState(11);
+  const budgetExp = lab.budgetExp;
+  const setBudgetExp = (v: number) => setLab({ budgetExp: v });
   const flops = Math.pow(10, budgetExp);
   const availableTokens = Math.round(report.cleanedChars / 4);
   const plan = useMemo(() => planScaling(flops, availableTokens), [flops, availableTokens]);
 
   /* 4 architecture */
-  const [dModel, setDModel] = useState(48);
-  const [nLayers, setNLayers] = useState(2);
-  const [nHeads, setNHeads] = useState(4);
-  const [merges, setMerges] = useState(120);
+  const { dModel, nLayers, nHeads, merges } = lab;
+  const setDModel = (v: number) => setLab({ dModel: v });
+  const setNLayers = (v: number) => setLab({ nLayers: v });
+  const setNHeads = (v: number) => setLab({ nHeads: v });
+  const setMerges = (v: number) => setLab({ merges: v });
   const arch = useMemo(
     () => ({ ...DEFAULT_TCONFIG, vocab: 120, dModel, nHeads, nLayers, dFF: dModel * 2, blockSize: 24 }),
     [dModel, nHeads, nLayers],
@@ -199,7 +211,8 @@ export default function LabRun() {
   const [trainer, setTrainer] = useState<LMTrainer | null>(null);
   const [running, setRunning] = useState(false);
   const [, setTick] = useState(0);
-  const [steps, setSteps] = useState(300);
+  const steps = lab.steps;
+  const setSteps = (v: number) => setLab({ steps: v });
 
   const build = useCallback(() => {
     const t = new LMTrainer(
@@ -245,7 +258,8 @@ export default function LabRun() {
   );
 
   /* 6 evaluation */
-  const [bar, setBar] = useState(0.3);
+  const bar = lab.bar;
+  const setBar = (v: number) => setLab({ bar: v });
   const [evalRuns, setEvalRuns] = useState<{ model: EvalRun; best: EvalRun } | null>(null);
   const runEvals = () => {
     if (!trainer) return;
@@ -283,8 +297,10 @@ export default function LabRun() {
   );
 
   /* 7 safety */
-  const [banText, setBanText] = useState('');
-  const [redTeamed, setRedTeamed] = useState(false);
+  const banText = lab.banText;
+  const setBanText = (v: string) => setLab({ banText: v });
+  const redTeamed = lab.redTeamed;
+  const setRedTeamed = (v: boolean) => setLab({ redTeamed: v });
   const banned = useMemo(
     () => (trainer && banText.trim() ? resolveBan(trainer.tok, banText.split(',')) : []),
     [trainer, banText],
@@ -329,7 +345,8 @@ export default function LabRun() {
   const gpu = GPU_PROFILES.find((g) => g.id === 'a100')!;
   const bound = trainer ? decodeBound(trainer.model.paramCount, 1, 2048, trainer.model.cfg, gpu) : null;
   const cost = trainer && bound ? costOf(bound.tokensPerSecond, 200, gpu, trainer.model.paramCount, 1, 2048, trainer.model.cfg) : null;
-  const [shipped, setShipped] = useState(false);
+  const shipped = lab.shipped;
+  const setShipped = (v: boolean) => setLab({ shipped: v });
   const gLaunch = useMemo(
     () =>
       gate('launch', [
@@ -433,9 +450,29 @@ export default function LabRun() {
         />
         <div className="mt-3">
           <ProgressBar value={done.length / STAGES.length} tone={done.length === STAGES.length ? 'ok' : 'accent'} />
-          <div className="mt-1 flex items-center justify-between text-[11px]" style={{ color: 'var(--text-3)' }}>
-            <span>{done.length} of {STAGES.length} stages signed off</span>
-            {shipped && <span style={{ color: 'var(--ok)' }}>shipped</span>}
+          <div className="mt-1 flex items-center justify-between gap-3 text-[11px]" style={{ color: 'var(--text-3)' }}>
+            <span>
+              {done.length} of {STAGES.length} stages signed off
+              {done.length > 0 && ' · kept across a reload'}
+            </span>
+            <span className="flex items-center gap-2">
+              {shipped && <span style={{ color: 'var(--ok)' }}>shipped</span>}
+              {done.length > 0 && (
+                <Btn
+                  size="sm"
+                  onClick={() => {
+                    resetLab();
+                    setTrainer(null);
+                    setRunning(false);
+                    setEvalRuns(null);
+                    setSample('');
+                    setOpen('charter');
+                  }}
+                >
+                  Start over
+                </Btn>
+              )}
+            </span>
           </div>
         </div>
       </Panel>

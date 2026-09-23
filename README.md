@@ -214,7 +214,7 @@ src/
     export.ts     emits real Python DSPy
   data/
     huggingface.ts   hub search and dataset viewer loading
-  store/        depth and theme, plus the one model shared between modules
+  store/        depth and theme; the one shared model; and the work kept across a reload
   ui/           design system, charts, canvases, network diagram, panels
   modules/      one file per walkthrough step
   content/      the ⓘ explanation registry
@@ -245,7 +245,7 @@ set `OLLAMA_ORIGINS`.
 pnpm test
 ```
 
-348 tests. The ones worth knowing about:
+353 tests. The ones worth knowing about:
 
 - Analytic gradients checked against central finite differences for the MLP (all three task types,
   with and without L2) and for **every tensor** in the transformer.
@@ -282,6 +282,8 @@ pnpm test
   because the monitoring path takes the fast route and it is only legitimate if the numbers match.
 - The lab programme asserted to be enterable only in order, to block on an unestablished licence, and
   never to present a gate that cannot be cleared.
+- Persistence asserted to degrade rather than throw: when the browser refuses the write, the corpus
+  text is dropped and the charter, architecture and place in the programme are kept.
 - Regression tests for ten real bugs found during development: a repeat detector that called any
   coincidental word alignment a loop; a diagnostic that scored samples against an empty corpus; a
   warmup schedule that gave step zero a learning rate of exactly zero; a banned token that could

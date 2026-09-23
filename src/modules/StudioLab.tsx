@@ -11,6 +11,7 @@ import {
 import { CORPORA, getCorpus } from '../engine/corpus';
 import { DEFAULT_LM_TRAIN, LMTrainer } from '../engine/lmTrainer';
 import { useModel } from '../store/model';
+import { MAX_PERSISTED_CHARS, useWork } from '../store/work';
 import LabRun from './LabRun';
 import { DEFAULT_TCONFIG, sampleToken, type TransformerConfig } from '../engine/transformer';
 import { mulberry32 } from '../engine/tensor';
@@ -105,12 +106,16 @@ export default function StudioLab() {
   const [backend, setBackend] = useState<BackendId>('cpu');
   const [heapMB, setHeapMB] = useState<number | null>(readHeapUsedMB());
 
-  /* --------------------------------------------------------------- data */
-  const [corpus, setCorpus] = useState<Corpus>(() => ({
-    text: getCorpus('stories', 12),
-    label: 'Tiny stories',
-    source: 'built in',
-  }));
+  /* --------------------------------------------------------------- data
+     The corpus and the design survive a reload: pulling a dataset and
+     dialling in an architecture is real work, and losing it to an accidental
+     refresh was the complaint. The trained model still does not survive, for
+     the reasons in store/work.ts. */
+  const storedCorpus = useWork((w) => w.corpus);
+  const setStoredCorpus = useWork((w) => w.setCorpus);
+  const corpusDropped = useWork((w) => w.corpusDropped);
+  const corpus: Corpus = storedCorpus ?? { text: getCorpus('stories', 12), label: 'Tiny stories', source: 'built in' };
+  const setCorpus = setStoredCorpus;
   const [query, setQuery] = useState('tiny_shakespeare');
   const [results, setResults] = useState<HFDataset[] | null>(null);
   const [searching, setSearching] = useState(false);
@@ -125,14 +130,17 @@ export default function StudioLab() {
   const [pasted, setPasted] = useState('');
 
   /* -------------------------------------------------------------- model */
-  const [dModel, setDModel] = useState(48);
-  const [nLayers, setNLayers] = useState(2);
-  const [nHeads, setNHeads] = useState(4);
-  const [dFF, setDFF] = useState(96);
-  const [blockSize, setBlockSize] = useState(24);
-  const [merges, setMerges] = useState(120);
-  const [batchSeqs, setBatchSeqs] = useState(8);
-  const [steps, setSteps] = useState(400);
+  const design = useWork((w) => w.design);
+  const setDesign = useWork((w) => w.setDesign);
+  const { dModel, nLayers, nHeads, dFF, blockSize, merges, batchSeqs, steps } = design;
+  const setDModel = (v: number) => setDesign({ dModel: v });
+  const setNLayers = (v: number) => setDesign({ nLayers: v });
+  const setNHeads = (v: number) => setDesign({ nHeads: v });
+  const setDFF = (v: number) => setDesign({ dFF: v });
+  const setBlockSize = (v: number) => setDesign({ blockSize: v });
+  const setMerges = (v: number) => setDesign({ merges: v });
+  const setBatchSeqs = (v: number) => setDesign({ batchSeqs: v });
+  const setSteps = (v: number) => setDesign({ steps: v });
 
   const [built, setBuilt] = useState<LMTrainer | null>(null);
   const [building, setBuilding] = useState(false);
@@ -541,6 +549,16 @@ export default function StudioLab() {
 
           <div className="space-y-4">
             <Panel title="Current corpus" right={<Badge tone="accent">{fmtInt(corpus.text.length)} chars</Badge>}>
+              {corpusDropped && (
+                <div className="mb-3">
+                  <Callout tone="warn" title="Too large to keep across a reload">
+                    This corpus was trimmed to {fmtInt(MAX_PERSISTED_CHARS)} characters before being
+                    saved, because a browser only gives the page a few megabytes of storage in total.
+                    Everything works normally now; reload and you will get the trimmed version back
+                    rather than the whole thing.
+                  </Callout>
+                </div>
+              )}
               <div className="space-y-1 text-[11.5px]">
                 <div className="flex justify-between">
                   <span style={{ color: 'var(--text-3)' }}>name</span>
