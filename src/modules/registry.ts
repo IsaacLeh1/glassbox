@@ -111,4 +111,13 @@ export const MODULES: ModuleDef[] = [
       'Quantise your own weights and measure what the precision actually bought you. Watch a real key-value cache turn quadratic generation into linear. Then cost the whole thing against real hardware and find the point where the queue goes vertical.',
     minutes: 30,
   },
+  {
+    path: '/monitor',
+    num: '12',
+    title: 'Monitoring',
+    tagline: 'Knowing it broke when nobody tells you',
+    blurb:
+      'Production has no answer key. Watch real traffic drift away from what your model was trained on, using only signals that need no labels, then try to set an alert that is neither useless nor exhausting. Finish by deciding whether the damage is worth the cost of fixing it.',
+    minutes: 30,
+  },
 ];

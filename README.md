@@ -30,6 +30,7 @@ pnpm dev
 | 09 | **Communication** | Open the model you trained in module 07. Read its weights, give it a prompt, then scrub back and forth through the exact forward pass behind every token it produced, with a logit lens showing what it would have said if it had stopped early. Then edit a weight, switch an attention head off, apply a guardrail or teach it something new, and re-run the identical prompt to see what changed. |
 | 10 | **Evaluation** | The step almost everyone skips, in the order professionals actually do it. Write down what success means, cut a held-out test set, find out what a bigram lookup table already scores, commit to a bar you cannot see past, and only then run the model. The page counts how many times you change the test after seeing a number. |
 | 11 | **Deployment** | Quantise your own weights and measure what the lost precision actually cost, scored on the module 10 harness. Watch a real key-value cache turn quadratic generation into linear, verified to produce identical logits. Then cost the whole thing against published hardware and find the load at which the queue goes vertical. |
+| 12 | **Monitoring** | The stage with no answer key. Watch real traffic drift away from what your model was trained on using only signals that need no labels, reveal the hidden truth to see how well they tracked it, then try to set an alert that is neither useless nor exhausting. Finish by pricing the damage against the cost of the fix. |
 
 Every explanation is written three times. A switch in the sidebar toggles the whole application
 between **Plain** (no notation at all), **Math** (the equation behind the step you are looking at)
@@ -79,6 +80,10 @@ This is the part that matters, so it is stated precisely.
   cases. The speed benefit is calculated from byte counts, and the panel says so.
 - A **key-value cache**, with a test asserting the cached decode path produces logits identical to
   recomputing the whole context, and a measured speed-up on the reader's own machine.
+- **Label-free drift detection**: population stability index, Jensen-Shannon divergence, model
+  surprise on incoming text, out-of-vocabulary rate. Traffic is real text from real corpora and
+  every signal is measured, with the true quality computed alongside so the proxies can be judged
+  against the thing they stand in for.
 - **Token-level blocking**, including the awkward part: a word is usually not one token, so the panel
   shows exactly which pieces get struck out and warns when that over-blocks.
 - The DSPy reimplementation: signatures, the `[[ ## field ## ]]` chat adapter format,
@@ -186,6 +191,7 @@ src/
     quantise.ts     real symmetric quantisation, per tensor or per row
     kvcache.ts      incremental decode with a key-value cache, and timing
     serving.ts      memory-bound decode, cost per token, M/M/1 queueing
+    monitor.ts      drift measures, traffic windows, alerting, the retrain case
     steering.ts     difference-in-means directions and token ban resolution
   sim/
     cluster.ts    capacity planning (real) + device telemetry (simulated)
@@ -227,7 +233,7 @@ set `OLLAMA_ORIGINS`.
 pnpm test
 ```
 
-286 tests. The ones worth knowing about:
+319 tests. The ones worth knowing about:
 
 - Analytic gradients checked against central finite differences for the MLP (all three task types,
   with and without L2) and for **every tensor** in the transformer.
@@ -255,6 +261,13 @@ pnpm test
   tokens a second, which is where published figures put it.
 - Queueing asserted to report saturation rather than a negative wait, and an unachievable latency
   promise as impossible rather than as two billion replicas.
+- A genuinely trained model asserted to be measurably more surprised by traffic from a corpus it was
+  not trained on, while its true quality on that traffic falls. The proxy has to really move, or the
+  monitoring module is teaching something false.
+- Drift measures asserted to survive a token appearing in one window and not the other, which is an
+  infinity unfloored and renders as a broken dashboard.
+- Scoring every position from one forward pass asserted to equal walking the sequence token by token,
+  because the monitoring path takes the fast route and it is only legitimate if the numbers match.
 - Regression tests for ten real bugs found during development: a repeat detector that called any
   coincidental word alignment a loop; a diagnostic that scored samples against an empty corpus; a
   warmup schedule that gave step zero a learning rate of exactly zero; a banned token that could

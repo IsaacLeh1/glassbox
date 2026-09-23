@@ -76,14 +76,40 @@ The real order of work at a company that ships models:
 | 8. Post-training: supervised fine-tuning, then preference optimisation | partly — module 09 fine-tunes; no preference optimisation |
 | 9. Safety work: red-teaming, guardrails, classifiers | partly — modules 08 and 09 cover mechanisms, not the process |
 | 10. Deploy: serving, quantisation, latency and cost per request | yes — module 11 |
-| 11. Monitor in production, collect feedback, decide when to retrain | no |
+| 11. Monitor in production, collect feedback, decide when to retrain | yes — module 12 |
 
-One stage is left. **Stage 11**, watching a model in production, is the only
-part of the lifecycle the course does not touch: no drift detection, no
-feedback collection, no decision about when the world has moved far enough to
-justify training again. Stage 8 is half done, since module 09 fine-tunes but
-no module covers preference optimisation, and stage 3 still loads data without
-cleaning or deduplicating it.
+**Every stage of the lifecycle is now covered at least once**, and the loop
+closes: module 12 sends the reader back to module 10 to recheck the bar, to
+module 07 to retrain, or to module 09 to teach.
+
+Two stages are covered only in part, and both are worth finishing:
+
+- **Stage 8** &mdash; module 09 does supervised fine-tuning, but nothing covers
+  preference optimisation, which is how a model is actually shaped after
+  pretraining. A DPO-style pairwise preference exercise on the user's own
+  model would complete it, and the machinery is mostly there already.
+- **Stage 3** &mdash; module 07 loads real data from Hugging Face and never
+  inspects it. Deduplication, licence checking and a look at what is actually
+  in the corpus is a real day of work at a real company and currently absent.
+
+---
+
+## Notes from module 12
+
+Monitoring needed a proxy signal that genuinely moves, not one asserted to.
+It does: a model trained on the stories corpus is measurably more surprised by
+weather-log traffic, and its true quality on that traffic really falls. A test
+pins both directions, because the module teaches something false if the proxy
+does not track the truth.
+
+Window scoring uses one forward pass for the whole sequence rather than one
+per token, which is about ten times less work and matters because the
+dashboard streams. A test asserts the fast path equals token-by-token teacher
+forcing.
+
+The true-quality column exists only because the experiment was constructed.
+The module shows it deliberately, so the proxies can be judged, and then tells
+the reader to hide it again.
 
 ---
 

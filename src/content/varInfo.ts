@@ -620,6 +620,63 @@ export const V = {
     down: 'A smaller model is faster and cheaper in direct proportion. Your own model is small enough that every cost rounds to nothing, which is true and not very instructive.',
     note: 'Only the shapes change. The arithmetic applied to a 405 billion parameter model here is the same arithmetic applied to the one you trained.',
   },
+
+  /* ------------------------------------------ module 12: monitoring -- */
+
+  monitorStrange: {
+    what: 'Where the unfamiliar traffic comes from. Your model was trained on one of the built-in corpora; this picks a different one to mix in, so the drift is a real change of subject rather than noise.',
+    up: 'A source further from the training text produces a larger, more obvious shift, and is caught sooner by every signal.',
+    down: 'A source close to the training text drifts subtly. That is the harder and far more common case: the traffic changes in a way no single day makes obvious.',
+    note: 'Both sides are real text and the model really processes every request. The only thing chosen is the mixture.',
+  },
+  monitorScenario: {
+    what: 'How the traffic changes over the period being watched. Each one is a shape real deployments actually see.',
+    up: 'Not an ordering. A sudden step is easy to catch, a gradual drift is the one that gets missed, and a temporary spike is the one that triggers expensive retraining nobody needed.',
+    down: 'Running the steady scenario first is worth doing, because anything your alert does there is a false alarm by definition.',
+    note: 'Pick a threshold that works on one scenario, then switch scenario without changing it. That is what production does to you.',
+  },
+  monitorWindows: {
+    what: 'How many time windows to watch. Think of each one as an hour, or a day, of traffic summarised into a single row of numbers.',
+    up: 'A longer history shows slow drift more clearly and takes proportionally longer to compute, because every request in every window is really run through the model.',
+    down: 'A shorter history is quicker and makes a gradual trend hard to distinguish from ordinary variation, which is exactly the difficulty real teams have.',
+    note: 'Every point on the dashboard is measured, not interpolated.',
+  },
+  monitorPerWindow: {
+    what: 'How many requests make up one window. This is your sample size per point on the chart.',
+    up: 'More requests per window makes each point steadier and the underlying trend easier to see through the noise. It costs proportionally more time.',
+    down: 'Fewer requests makes every point jumpy, and a jumpy signal is one you will either ignore or chase. Under-sampled monitoring produces false alarms and distrust in equal measure.',
+    note: 'The same sample-size argument as the confidence intervals in module 10, applied to a dashboard instead of a benchmark.',
+  },
+  monitorSignal: {
+    what: 'Which measurement the alert watches. All four can be computed on live traffic with no ground truth at all, which is the only kind of signal production gives you.',
+    up: 'Not an ordering. Surprise is the most generally useful, input drift says the question changed without saying whether the model minds, unreadable characters catch a different alphabet, and repetition catches a model that has come apart.',
+    down: 'Whichever you pick, it is a proxy. None of them measures whether the answers were any good, because nothing available in production does.',
+    note: 'Real teams watch several at once and alert on combinations, precisely because each one alone is easy to fool.',
+  },
+  monitorThreshold: {
+    what: 'How high the signal has to go before the alert fires. This single number is the entire tradeoff between being woken up for nothing and not being woken up at all.',
+    up: 'Fewer false alarms and a longer delay before a real problem is noticed, until eventually the alert never fires and may as well not exist.',
+    down: 'Faster detection and more false alarms. An alert that cries wolf is worse than no alert, because people learn to close it without reading it.',
+    note: 'The sweep below shows every threshold at once. There is usually no setting with zero of both, and choosing between them is a judgement about which mistake costs more.',
+  },
+  monitorRequestsPerDay: {
+    what: 'How much traffic the deployment serves each day. It converts a quality drop into an amount of money, which is what turns a dashboard into a decision.',
+    up: 'At high volume even a tiny degradation is expensive, so retraining pays for itself almost immediately.',
+    down: 'At low volume a model can be noticeably worse and still not be worth the cost and risk of replacing. That is a legitimate answer, not neglect.',
+    note: 'This is why the same amount of drift justifies action at one company and not at another.',
+  },
+  monitorValue: {
+    what: 'What one good answer is worth. A rough number is fine; the point is that a quality drop has to be priced before it can be compared against the cost of fixing it.',
+    up: 'Higher stakes per request means degradation costs more per day and the case for retraining gets stronger.',
+    down: 'If each answer is worth very little, a large relative drop can still be a small absolute loss.',
+    note: 'Putting a number here is uncomfortable and unavoidable. Refusing to estimate it does not remove the tradeoff, it just makes the decision implicit.',
+  },
+  monitorRetrainCost: {
+    what: 'What it costs to train a replacement and put it into production: compute, the time of the people who run it, and the evaluation it has to pass first.',
+    up: 'An expensive retrain has to clear a higher bar, so you tolerate more drift before acting.',
+    down: 'Cheap retraining lets you refresh often, which is why teams invest so heavily in making the pipeline push-button.',
+    note: 'A new model has not been through the evaluation the old one passed. That risk is part of the cost even though it does not appear on an invoice.',
+  },
 } satisfies Record<string, VarInfo>;
 
 export type VarKey = keyof typeof V;

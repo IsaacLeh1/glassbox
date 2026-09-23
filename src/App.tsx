@@ -14,6 +14,7 @@ import GuardrailsLab from './modules/GuardrailsLab';
 import CommsLab from './modules/CommsLab';
 import EvalLab from './modules/EvalLab';
 import DeployLab from './modules/DeployLab';
+import MonitorLab from './modules/MonitorLab';
 import { MODULES } from './modules/registry';
 
 function Logo() {
@@ -222,6 +223,7 @@ export default function App() {
             <Route path="/comms" element={<CommsLab />} />
             <Route path="/evals" element={<EvalLab />} />
             <Route path="/deploy" element={<DeployLab />} />
+            <Route path="/monitor" element={<MonitorLab />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
