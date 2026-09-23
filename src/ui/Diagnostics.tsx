@@ -141,7 +141,7 @@ export default function Diagnostics({
           }
           code={
             <span className="mono text-[11px]">
-              for (i&lt;n) &#123; probs = model.predictNext(ids); ids.push(sampleToken(probs, cfg, rand)); &#125;
+              for (i&lt;n) &#123; logits = model.predictNext(ids); ids.push(sampleToken(logits, cfg, rand)); &#125;
             </span>
           }
         />

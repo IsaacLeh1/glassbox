@@ -481,8 +481,8 @@ function TrainTab({ trainer, bump, corpusId }: LMCtx & { corpusId: string }) {
       const rand = mulberry32(Date.now() & 0xffff);
       let ids = trainer.tok.encode('the ');
       for (let i = 0; i < n; i++) {
-        const { probs } = trainer.model.predictNext(ids);
-        ids = [...ids, sampleToken(probs, { temperature: 0.8, topK: 12, topP: 0.95 }, rand).chosen];
+        const { logits } = trainer.model.predictNext(ids);
+        ids = [...ids, sampleToken(logits, { temperature: 0.8, topK: 12, topP: 0.95 }, rand).chosen];
       }
       return trainer.tok.decode(ids);
     },
@@ -696,15 +696,15 @@ function GenerateTab({ trainer, version }: LMCtx) {
 
   const step = useMemo(() => {
     if (allIds.length === 0) return null;
-    const { probs } = trainer.model.predictNext(allIds);
+    const { logits } = trainer.model.predictNext(allIds);
     // Preview the filtering without consuming randomness.
-    return sampleToken(probs, cfg, () => 0.5);
+    return sampleToken(logits, cfg, () => 0.5);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allIds, cfg, trainer, version]);
 
   const advance = useCallback(() => {
-    const { probs } = trainer.model.predictNext(allIds);
-    const s = sampleToken(probs, cfg, randRef.current);
+    const { logits } = trainer.model.predictNext(allIds);
+    const s = sampleToken(logits, cfg, randRef.current);
     setGenerated((g) => [...g, s.chosen]);
   }, [allIds, cfg, trainer]);
 

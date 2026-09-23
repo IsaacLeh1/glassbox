@@ -93,4 +93,13 @@ export const MODULES: ModuleDef[] = [
       'Open the model you trained yourself. Read its weights, give it a prompt, then scrub back and forth through the exact forward pass that produced every token. Edit a weight, switch an attention head off, apply a guardrail, or teach it something new, and re-run the identical prompt to see what changed.',
     minutes: 35,
   },
+  {
+    path: '/evals',
+    num: '10',
+    title: 'Evaluation',
+    tagline: 'Deciding what counts as working, before you can see the answer',
+    blurb:
+      'The step almost everyone skips. Write down what success means, build a held-out test set, find out what a lookup table already scores, commit to a bar, and only then look. Watch contamination inflate a score and watch a confidence interval refuse to let eight cases prove anything.',
+    minutes: 30,
+  },
 ];

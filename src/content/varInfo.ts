@@ -506,6 +506,51 @@ export const V = {
     down: 'A lighter touch that nudges the model without rewriting it. Fewer passes leave more of the original behaviour intact.',
     note: 'Every change here can be undone exactly, because the weights were copied before the first step.',
   },
+
+  /* ------------------------------------------ module 10: evaluation -- */
+
+  evalCaseCount: {
+    what: 'How many test cases to cut from the corpus. Each one is a prompt paired with the continuation that actually followed it, so the right answer is known without anyone having to write it.',
+    up: 'More cases means a narrower confidence interval and a result you can actually act on. The cost is linear: every case is another full run of the model.',
+    down: 'Faster, and far less informative. At eight cases a score of 100 percent is still consistent with a true rate near 60 percent, which is why small evals mislead so reliably.',
+    note: 'Watch the interval below the score rather than the score. It is the honest summary of how much you have learned.',
+  },
+  evalPromptLen: {
+    what: 'How many tokens of context each test case gives the model before asking it to continue.',
+    up: 'More context to work from, so the task gets easier and scores rise. That is not the model improving; it is the test getting gentler.',
+    down: 'Less to go on. A very short prompt tests what the model knows in general rather than whether it can use what it was given.',
+    note: 'Changing this changes the difficulty of the benchmark. Change it before you commit to a target, never after.',
+  },
+  evalAnswerLen: {
+    what: 'How many tokens of continuation the model has to produce and be judged on.',
+    up: 'Harder, and it falls away quickly: getting five tokens right in a row is far less likely than getting one right, because the errors compound.',
+    down: 'Easier, and at one token the exact-match and first-token metrics become the same test.',
+    note: 'A long expected answer with an exact-match metric is close to unpassable for a small model. That is a fact about your metric, not about the model.',
+  },
+  evalTopK: {
+    what: 'How many of the model\u2019s highest-scoring candidates count as getting it right, for the top-k metric only.',
+    up: 'More generous. At k equal to the whole vocabulary every case passes and the metric measures nothing at all.',
+    down: 'Stricter. At one this is simply "was its single best guess correct".',
+    note: 'Useful during development because it moves early, and misleading in a headline because it rewards nearly knowing.',
+  },
+  evalGreedy: {
+    what: 'Whether to always take the single most likely token when generating an answer, rather than drawing one at random.',
+    up: 'On, the eval is repeatable: the same model and the same cases give the same score every time, so a change in the score means a change in the model.',
+    down: 'Off, the model samples, and the score moves from run to run even with nothing changed. Any difference you see is then partly the dice.',
+    note: 'Sampled evals are sometimes what you want, but then you have to run them several times and report the spread, not a single number.',
+  },
+  evalTarget: {
+    what: 'The score you commit to counting as success, written down before you look at any result.',
+    up: 'A higher bar is a stronger claim and more likely to be missed. Set it from what the task actually needs, not from what you think you can hit.',
+    down: 'A lower bar is easier to clear and proves less. A target below what the trivial baselines already score proves nothing whatsoever.',
+    note: 'The point is committing before the result exists. Moving it afterwards is the most common way an evaluation quietly stops meaning anything, and this page counts it when you do.',
+  },
+  evalTemperature: {
+    what: 'How much randomness to allow when the eval generates an answer, used only when greedy is switched off.',
+    up: 'More varied answers and a noisier, generally lower score. Two runs of the identical model will disagree.',
+    down: 'Closer to always taking the best guess, until at the floor it is greedy in all but name.',
+    note: 'If you are changing this to move the score, you are tuning the test rather than the model.',
+  },
 } satisfies Record<string, VarInfo>;
 
 export type VarKey = keyof typeof V;

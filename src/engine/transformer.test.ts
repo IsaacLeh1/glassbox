@@ -155,8 +155,8 @@ describe('transformer learns', () => {
     expect(after).toBeLessThan(0.05);
 
     // And it should now predict the continuation correctly.
-    const { probs } = m.predictNext([1, 2, 3]);
-    const best = probs.indexOf(Math.max(...probs));
+    const { logits } = m.predictNext([1, 2, 3]);
+    const best = logits.indexOf(Math.max(...logits));
     expect(best).toBe(4);
   });
 });

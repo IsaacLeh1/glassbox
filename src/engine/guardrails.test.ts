@@ -177,17 +177,17 @@ describe('activation steering', () => {
   it('a zero-strength steer leaves the output bit-for-bit unchanged', () => {
     const d = contrastDirection(model, tok, A, B, 1)!;
     const ids = tok.encode('the fox');
-    const plain = model.predictNext(ids).probs;
-    const zero = model.predictNext(ids, { layer: d.layer, vec: d.vec, scale: 0 }).probs;
+    const plain = model.predictNext(ids).logits;
+    const zero = model.predictNext(ids, { layer: d.layer, vec: d.vec, scale: 0 }).logits;
     expect(zero).toEqual(plain);
   });
 
   it('a nonzero steer changes the prediction, and the sign matters', () => {
     const d = contrastDirection(model, tok, A, B, 1)!;
     const ids = tok.encode('the fox');
-    const plain = model.predictNext(ids).probs;
-    const pos = model.predictNext(ids, { layer: d.layer, vec: d.vec, scale: 8 }).probs;
-    const neg = model.predictNext(ids, { layer: d.layer, vec: d.vec, scale: -8 }).probs;
+    const plain = model.predictNext(ids).logits;
+    const pos = model.predictNext(ids, { layer: d.layer, vec: d.vec, scale: 8 }).logits;
+    const neg = model.predictNext(ids, { layer: d.layer, vec: d.vec, scale: -8 }).logits;
 
     const diff = (a: number[], b: number[]) => a.reduce((s, x, i) => s + Math.abs(x - b[i]), 0);
     expect(diff(pos, plain)).toBeGreaterThan(1e-4);
@@ -207,8 +207,8 @@ describe('activation steering', () => {
     const d = contrastDirection(model, tok, A, B, -1)!;
     expect(d.layer).toBe(-1);
     const ids = tok.encode('the fox');
-    const plain = model.predictNext(ids).probs;
-    const steered = model.predictNext(ids, { layer: -1, vec: d.vec, scale: 6 }).probs;
+    const plain = model.predictNext(ids).logits;
+    const steered = model.predictNext(ids, { layer: -1, vec: d.vec, scale: 6 }).logits;
     const diff = plain.reduce((s, x, i) => s + Math.abs(x - steered[i]), 0);
     expect(diff).toBeGreaterThan(1e-5);
   });

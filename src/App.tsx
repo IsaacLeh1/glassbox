@@ -12,6 +12,7 @@ import DSPyLab from './modules/DSPyLab';
 import StudioLab from './modules/StudioLab';
 import GuardrailsLab from './modules/GuardrailsLab';
 import CommsLab from './modules/CommsLab';
+import EvalLab from './modules/EvalLab';
 import { MODULES } from './modules/registry';
 
 function Logo() {
@@ -218,6 +219,7 @@ export default function App() {
             <Route path="/studio" element={<StudioLab />} />
             <Route path="/guardrails" element={<GuardrailsLab />} />
             <Route path="/comms" element={<CommsLab />} />
+            <Route path="/evals" element={<EvalLab />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>

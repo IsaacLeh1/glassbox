@@ -517,14 +517,22 @@ export class Transformer {
     }
   }
 
-  /** Next-token distribution given a context, plus the full trace behind it. */
-  predictNext(tokens: number[], steer?: Steer): { probs: number[]; trace: Trace } {
+  /**
+   * Raw next-token scores for a context, plus the full trace behind them.
+   *
+   * These are logits, not probabilities: unbounded, able to be negative, and
+   * not summing to anything. Callers hand them to `sampleToken`, which does
+   * the softmax itself. The field was once called `probs`, which was a trap
+   * -- every caller happened to be correct, but anyone writing a new one had
+   * to read the body to find out.
+   */
+  predictNext(tokens: number[], steer?: Steer): { logits: number[]; trace: Trace } {
     const ctx = tokens.slice(-this.cfg.blockSize);
     const fw = this.forward(ctx, steer);
     const T = ctx.length;
     const row: number[] = [];
     for (let j = 0; j < this.cfg.vocab; j++) row.push(fw.trace.logits.data[(T - 1) * this.cfg.vocab + j]);
-    return { probs: row, trace: fw.trace };
+    return { logits: row, trace: fw.trace };
   }
 
   flatParams(): Float64Array {

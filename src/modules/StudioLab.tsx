@@ -274,8 +274,8 @@ export default function StudioLab() {
       let ids = t.tok.encode(corpus.text.slice(0, 24).split(/\s+/)[0] || 'the');
       if (ids.length === 0) ids = [0];
       for (let i = 0; i < n; i++) {
-        const { probs } = t.model.predictNext(ids);
-        ids = [...ids, sampleToken(probs, { temperature: 0.85, topK: 20, topP: 0.95 }, rand).chosen];
+        const { logits } = t.model.predictNext(ids);
+        ids = [...ids, sampleToken(logits, { temperature: 0.85, topK: 20, topP: 0.95 }, rand).chosen];
       }
       return t.tok.decode(ids);
     },

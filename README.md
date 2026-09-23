@@ -28,6 +28,7 @@ pnpm dev
 | 07 | **Build your own** | Pull a dataset live from Hugging Face, design a transformer to your own specification, pick a compute device, set a RAM and CPU budget your machine can live with, train it, and measure yourself against a real GPU cluster. |
 | 08 | **Guardrails** | Five mechanisms sit between a request and an answer and only one is inside the model. Block tokens live and watch the model route around them, find a behaviour direction inside the network and push along it, and see why there is no list of rules in there. |
 | 09 | **Communication** | Open the model you trained in module 07. Read its weights, give it a prompt, then scrub back and forth through the exact forward pass behind every token it produced, with a logit lens showing what it would have said if it had stopped early. Then edit a weight, switch an attention head off, apply a guardrail or teach it something new, and re-run the identical prompt to see what changed. |
+| 10 | **Evaluation** | The step almost everyone skips, in the order professionals actually do it. Write down what success means, cut a held-out test set, find out what a bigram lookup table already scores, commit to a bar you cannot see past, and only then run the model. The page counts how many times you change the test after seeing a number. |
 
 Every explanation is written three times. A switch in the sidebar toggles the whole application
 between **Plain** (no notation at all), **Math** (the equation behind the step you are looking at)
@@ -67,6 +68,11 @@ This is the part that matters, so it is stated precisely.
   how interpretability work establishes what an individual head contributes.
 - **Fine-tuning** an already-trained model on your own examples, with loss on the original corpus
   measured alongside so catastrophic forgetting is visible rather than asserted.
+- An **evaluation harness** in which the model and every trivial baseline (uniform, unigram,
+  bigram, repeat) are scored through one identical code path, with Wilson score intervals so a
+  perfect run on eight cases cannot masquerade as certainty.
+- **Contamination measured rather than assumed**: every case is checked against the training text
+  verbatim and by overlapping n-grams, and the result is broken down by case origin.
 - **Token-level blocking**, including the awkward part: a word is usually not one token, so the panel
   shows exactly which pieces get struck out and warns when that over-blocks.
 - The DSPy reimplementation: signatures, the `[[ ## field ## ]]` chat adapter format,
@@ -170,6 +176,7 @@ src/
     replay.ts       a forward pass flattened into scrubbable stages, plus the logit lens
     converse.ts     generation that keeps every trace, for replay
     finetune.ts     teaching a trained model, with a forgetting measurement
+    evals.ts        baselines, metrics, Wilson intervals, contamination checks
     steering.ts     difference-in-means directions and token ban resolution
   sim/
     cluster.ts    capacity planning (real) + device telemetry (simulated)
@@ -211,7 +218,7 @@ set `OLLAMA_ORIGINS`.
 pnpm test
 ```
 
-213 tests. The ones worth knowing about:
+248 tests. The ones worth knowing about:
 
 - Analytic gradients checked against central finite differences for the MLP (all three task types,
   with and without L2) and for **every tensor** in the transformer.
@@ -227,6 +234,10 @@ pnpm test
 - A conversation verified to grow its context by one token per step, to condition each step on what
   the last one chose, to be reproducible under a fixed seed, and to never exceed the context window.
 - Fine-tuning verified to lower the loss on what it is taught and to be undoable weight for weight.
+- The Wilson interval asserted not to report zero width at eight passes out of eight, which is the
+  exact way a small eval set gets mistaken for a conclusive one.
+- A bigram lookup table asserted to beat an untrained transformer, because the module claims it does.
+- Training directly on the test cases asserted to inflate the score, and to be exactly reversible.
 - Regression tests for ten real bugs found during development: a repeat detector that called any
   coincidental word alignment a loop; a diagnostic that scored samples against an empty corpus; a
   warmup schedule that gave step zero a learning rate of exactly zero; a banned token that could
@@ -234,9 +245,10 @@ pnpm test
   a training loop interruptible only between whole steps, which froze the page at long context;
   a forward pass that read past the end of the position table and turned silently into NaN instead
   of failing; a sampler that could not say which of top-k and top-p had actually cut a token; a
-  vocabulary check that blamed the user for a newline it had inserted itself; and a frame loop that
+  vocabulary check that blamed the user for a newline it had inserted itself; a frame loop that
   detected a stalled page by `document.hidden` alone, so any run froze silently whenever the window
-  was merely behind another one.
+  was merely behind another one; and `predictNext` returning a field called `probs` that had always
+  held logits, which every existing caller happened to handle correctly and the first new one did not.
 
 ---
 

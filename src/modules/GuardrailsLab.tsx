@@ -273,8 +273,8 @@ function BlockTab({ trainer, trained }: Ctx) {
     if (!trained) return null;
     const ids = trainer.tok.encode(prompt);
     if (ids.length === 0) return null;
-    const { probs } = trainer.model.predictNext(ids);
-    return sampleToken(probs, { temperature: 0.9, topK: 0, topP: 1, banned }, () => 0.5);
+    const { logits } = trainer.model.predictNext(ids);
+    return sampleToken(logits, { temperature: 0.9, topK: 0, topP: 1, banned }, () => 0.5);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [prompt, banned, trainer, trained, trainer.step]);
 
@@ -283,8 +283,8 @@ function BlockTab({ trainer, trained }: Ctx) {
       const rand = mulberry32(99);
       let ids = trainer.tok.encode(prompt);
       for (let i = 0; i < 34; i++) {
-        const { probs } = trainer.model.predictNext(ids);
-        ids = [...ids, sampleToken(probs, { temperature: 0.9, topK: 15, topP: 0.95, banned: ban }, rand).chosen];
+        const { logits } = trainer.model.predictNext(ids);
+        ids = [...ids, sampleToken(logits, { temperature: 0.9, topK: 15, topP: 0.95, banned: ban }, rand).chosen];
       }
       return trainer.tok.decode(ids);
     };
@@ -535,8 +535,8 @@ function SteerTab({ trainer, trained }: Ctx) {
       let ids = trainer.tok.encode(prompt);
       if (ids.length === 0) ids = [0];
       for (let i = 0; i < 28; i++) {
-        const { probs } = trainer.model.predictNext(ids, steer);
-        ids = [...ids, sampleToken(probs, { temperature: 0.85, topK: 15, topP: 0.95 }, rand).chosen];
+        const { logits } = trainer.model.predictNext(ids, steer);
+        ids = [...ids, sampleToken(logits, { temperature: 0.85, topK: 15, topP: 0.95 }, rand).chosen];
       }
       return trainer.tok.decode(ids);
     },

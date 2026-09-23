@@ -66,21 +66,41 @@ The real order of work at a company that ships models:
 
 | Stage | Covered |
 |---|---|
-| 1. Define the problem and what success means | no |
-| 2. **Design the evaluation before training anything** | no |
+| 1. Define the problem and what success means | partly — module 10 opens by making you write it down |
+| 2. **Design the evaluation before training anything** | yes — module 10 |
 | 3. Source, licence, clean and deduplicate data | partly — module 07 loads real data, but does not clean or inspect it |
 | 4. Tokenizer decisions | yes — module 04 |
 | 5. Choose architecture and size against a compute budget | yes — modules 05 and 07 |
 | 6. Pretraining run, with monitoring and incident handling | yes — modules 05 and 07 |
-| 7. Evaluate against the held-out set | partly — loss and perplexity only, no task evals |
+| 7. Evaluate against the held-out set | yes — module 10, with baselines and confidence intervals |
 | 8. Post-training: supervised fine-tuning, then preference optimisation | partly — module 09 fine-tunes; no preference optimisation |
 | 9. Safety work: red-teaming, guardrails, classifiers | partly — modules 08 and 09 cover mechanisms, not the process |
 | 10. Deploy: serving, quantisation, latency and cost per request | no |
 | 11. Monitor in production, collect feedback, decide when to retrain | no |
 
-The largest remaining gaps are **2, 10 and 11**. Of those, designing the
-evaluation first is the one most worth adding: it is the step beginners skip
-and professionals never do, and it reframes everything downstream.
+The largest remaining gaps are now **10 and 11**: nothing covers serving a
+model, quantising it, or the cost and latency of a single request, and nothing
+covers watching it in production and deciding when to retrain. Stage 8 is half
+done, since module 09 fine-tunes but no module covers preference optimisation.
+
+---
+
+## A finding from module 10, worth remembering
+
+The built-in corpora are generated from a small template grammar, so the
+held-out split is drawn from exactly the same distribution as the training
+split and contains nothing unique. A normally-trained model therefore scores
+the same on both, and the contamination gap everyone expects does not appear.
+
+This was found by asserting that gap in a test, watching it pass on one seed,
+then measuring it properly across three training lengths and two sample sizes,
+where it was consistently absent or slightly reversed. Module 10 now measures
+the split rather than claiming it, and demonstrates contamination by
+fine-tuning directly on the test cases instead, which moves the score from
+about 40 percent to about 90 percent and is reversible.
+
+If a corpus with genuine long-tail content is ever added, the natural gap
+should appear on its own and that copy can be revisited.
 
 ---
 
