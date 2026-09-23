@@ -13,6 +13,7 @@ import StudioLab from './modules/StudioLab';
 import GuardrailsLab from './modules/GuardrailsLab';
 import CommsLab from './modules/CommsLab';
 import EvalLab from './modules/EvalLab';
+import DeployLab from './modules/DeployLab';
 import { MODULES } from './modules/registry';
 
 function Logo() {
@@ -220,6 +221,7 @@ export default function App() {
             <Route path="/guardrails" element={<GuardrailsLab />} />
             <Route path="/comms" element={<CommsLab />} />
             <Route path="/evals" element={<EvalLab />} />
+            <Route path="/deploy" element={<DeployLab />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>

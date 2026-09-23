@@ -551,6 +551,75 @@ export const V = {
     down: 'Closer to always taking the best guess, until at the floor it is greedy in all but name.',
     note: 'If you are changing this to move the score, you are tuning the test rather than the model.',
   },
+
+  /* ------------------------------------------ module 11: deployment -- */
+
+  deployBits: {
+    what: 'How many bits to keep for each weight. Thirty-two is the usual starting point; production serving almost always uses eight or fewer.',
+    up: 'More bits means a finer grid and less damage, but the model takes proportionally more memory and every generated token takes proportionally longer to produce, because producing one means reading every weight.',
+    down: 'Smaller and faster in exact proportion. Somewhere below eight bits the quality starts to go, and below four it usually falls off a cliff. Where the cliff sits is a property of the model, which is why you measure rather than guess.',
+    note: 'The weights really are snapped onto the coarse grid here, so the quality cost you see is genuine. The speed saving is calculated from the byte count rather than observed, because this engine has no integer kernels.',
+  },
+  deployScheme: {
+    what: 'Whether one scale covers the whole table of weights or each row gets its own.',
+    up: 'Per row is more accurate, because a single unusually large weight can only coarsen its own row instead of the entire tensor. It is what production quantisation does.',
+    down: 'One scale for everything is simpler and costs fewer extra numbers, and it degrades badly whenever a tensor contains outliers.',
+    note: 'The per-tensor error table below shows which tensors have the worst outliers. Those are the ones that benefit most from per-row scaling.',
+  },
+  deployContext: {
+    what: 'How long a conversation to plan for. Every position in the context has to be held in the key-value cache, for every layer and every head, for as long as the request lasts.',
+    up: 'A longer context costs more memory per request and slows every generated token, because the cache is read alongside the weights. It also means fewer conversations fit on one card at the same time.',
+    down: 'Cheaper and faster, and the model simply cannot refer to anything further back than this.',
+    note: 'This is the real reason long context windows are expensive to offer. The cost is linear in length and it is paid on every single token.',
+  },
+  deployGpu: {
+    what: 'Which card to cost the deployment against. The figures are published specifications, not measurements taken here.',
+    up: 'Faster memory produces tokens proportionally faster, because single-stream decoding is limited by memory bandwidth rather than arithmetic. More memory holds more concurrent conversations.',
+    down: 'A cheaper card costs less per hour and serves fewer tokens per hour. Which wins depends entirely on how well you keep it busy.',
+    note: 'Compare the memory-bandwidth figure rather than the teraflops. For serving, bandwidth is what decides the answer.',
+  },
+  deployTokensPerRequest: {
+    what: 'How many tokens a typical answer contains. This converts a token rate into a request rate, which is what capacity is actually planned in.',
+    up: 'Longer answers mean fewer requests per second from the same hardware, and a proportionally higher cost per request.',
+    down: 'Short answers are cheap and let one card serve far more users. It is why chat products work so hard to keep responses brief.',
+    note: 'Cost per million tokens does not change with this. Cost per request does, in direct proportion.',
+  },
+  deployArrival: {
+    what: 'How many requests arrive each second. Capacity is not a single number: what matters is this figure compared against how fast the server can work.',
+    up: 'As arrivals approach capacity the waiting time does not rise gently, it explodes. At ninety percent utilisation the wait is roughly ten times the service time, and at ninety-nine percent it is a hundred times.',
+    down: 'Below about seventy percent utilisation, queueing barely contributes anything and latency is essentially the service time.',
+    note: 'This cliff is why a service that tested fine falls over at launch. Plan for the peak, not the average.',
+  },
+  deployP99: {
+    what: 'The latency you promise. Ninety-nine percent of requests should finish faster than this, which is a far harder promise than an average.',
+    up: 'A looser promise needs less hardware, and users notice the slow tail more than they notice the average.',
+    down: 'A tighter promise costs replicas, and below about twice the service time it becomes very expensive indeed, because you are buying idle capacity to absorb bursts.',
+    note: 'The tail is the number users experience as "it is slow". Averages hide exactly the requests people complain about.',
+  },
+  deployBatch: {
+    what: 'How many requests to run through the weights together. Since the same weights serve every request in the batch, reading them once serves all of them.',
+    up: 'Throughput rises almost in proportion at first, then flattens once the key-value caches cost more to read than the weights do. Each individual request also waits longer for the batch to fill.',
+    down: 'A batch of one gives the fastest possible single answer and the worst possible hardware utilisation. Interactive products sit near this end, bulk pipelines at the other.',
+    note: 'Batching helps large models most, because they have more weight bytes to amortise across the batch.',
+  },
+  deployPromptLen: {
+    what: 'How long a prompt to time. Processing the prompt is called prefill, and it handles every position at once rather than one at a time.',
+    up: 'A longer prompt costs more prefill time, and prefill is the delay before the first word appears. It is limited by arithmetic rather than memory, which makes it behave quite differently from generation.',
+    down: 'A shorter prompt means the answer starts sooner. Once generation begins, prompt length only matters through the cache.',
+    note: 'Time to first token and time between tokens are two different problems with two different bottlenecks, which is why serving systems report them separately.',
+  },
+  deployGenLen: {
+    what: 'How many tokens to generate while timing. Each one is a separate pass through the network and cannot be started until the previous one has finished.',
+    up: 'A longer generation gives a steadier average, and takes proportionally longer to measure. The sequential nature is unavoidable: token twenty depends on token nineteen.',
+    down: 'Faster to measure and noisier, because a few milliseconds of browser scheduling counts for more.',
+    note: 'This sequential dependency is why generation cannot be parallelised within a single request, and why batching across requests is the only way to use the hardware fully.',
+  },
+  deployTarget: {
+    what: 'Which model to run the cost arithmetic against. The formula is driven entirely by parameter count and cache shape, so it applies unchanged at any size.',
+    up: 'A larger model reads more bytes per token, so it produces text more slowly, costs more per token, and leaves less card memory for conversations. Every figure on this page moves together.',
+    down: 'A smaller model is faster and cheaper in direct proportion. Your own model is small enough that every cost rounds to nothing, which is true and not very instructive.',
+    note: 'Only the shapes change. The arithmetic applied to a 405 billion parameter model here is the same arithmetic applied to the one you trained.',
+  },
 } satisfies Record<string, VarInfo>;
 
 export type VarKey = keyof typeof V;

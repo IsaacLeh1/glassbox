@@ -29,6 +29,7 @@ pnpm dev
 | 08 | **Guardrails** | Five mechanisms sit between a request and an answer and only one is inside the model. Block tokens live and watch the model route around them, find a behaviour direction inside the network and push along it, and see why there is no list of rules in there. |
 | 09 | **Communication** | Open the model you trained in module 07. Read its weights, give it a prompt, then scrub back and forth through the exact forward pass behind every token it produced, with a logit lens showing what it would have said if it had stopped early. Then edit a weight, switch an attention head off, apply a guardrail or teach it something new, and re-run the identical prompt to see what changed. |
 | 10 | **Evaluation** | The step almost everyone skips, in the order professionals actually do it. Write down what success means, cut a held-out test set, find out what a bigram lookup table already scores, commit to a bar you cannot see past, and only then run the model. The page counts how many times you change the test after seeing a number. |
+| 11 | **Deployment** | Quantise your own weights and measure what the lost precision actually cost, scored on the module 10 harness. Watch a real key-value cache turn quadratic generation into linear, verified to produce identical logits. Then cost the whole thing against published hardware and find the load at which the queue goes vertical. |
 
 Every explanation is written three times. A switch in the sidebar toggles the whole application
 between **Plain** (no notation at all), **Math** (the equation behind the step you are looking at)
@@ -73,6 +74,11 @@ This is the part that matters, so it is stated precisely.
   perfect run on eight cases cannot masquerade as certainty.
 - **Contamination measured rather than assumed**: every case is checked against the training text
   verbatim and by overlapping n-grams, and the result is broken down by case origin.
+- **Post-training quantisation** that really snaps every weight onto a coarse grid, symmetric and
+  linear, per tensor or per row, so the quality cost is genuine and gets re-scored on held-out
+  cases. The speed benefit is calculated from byte counts, and the panel says so.
+- A **key-value cache**, with a test asserting the cached decode path produces logits identical to
+  recomputing the whole context, and a measured speed-up on the reader's own machine.
 - **Token-level blocking**, including the awkward part: a word is usually not one token, so the panel
   shows exactly which pieces get struck out and warns when that over-blocks.
 - The DSPy reimplementation: signatures, the `[[ ## field ## ]]` chat adapter format,
@@ -177,6 +183,9 @@ src/
     converse.ts     generation that keeps every trace, for replay
     finetune.ts     teaching a trained model, with a forgetting measurement
     evals.ts        baselines, metrics, Wilson intervals, contamination checks
+    quantise.ts     real symmetric quantisation, per tensor or per row
+    kvcache.ts      incremental decode with a key-value cache, and timing
+    serving.ts      memory-bound decode, cost per token, M/M/1 queueing
     steering.ts     difference-in-means directions and token ban resolution
   sim/
     cluster.ts    capacity planning (real) + device telemetry (simulated)
@@ -218,7 +227,7 @@ set `OLLAMA_ORIGINS`.
 pnpm test
 ```
 
-248 tests. The ones worth knowing about:
+286 tests. The ones worth knowing about:
 
 - Analytic gradients checked against central finite differences for the MLP (all three task types,
   with and without L2) and for **every tensor** in the transformer.
@@ -238,6 +247,14 @@ pnpm test
   exact way a small eval set gets mistaken for a conclusive one.
 - A bigram lookup table asserted to beat an untrained transformer, because the module claims it does.
 - Training directly on the test cases asserted to inflate the score, and to be exactly reversible.
+- The key-value cache asserted to produce logits identical to the uncached path, token after token
+  through a whole generated continuation. An optimisation that changes the answer is not one.
+- Quantisation asserted to restrict a four-bit tensor to at most 31 distinct values, to lose more at
+  every narrower width, and for per-row scaling never to be worse than one scale per tensor.
+- The decode bound checked against reality: an 8B model at fp16 on an H100 lands between 100 and 400
+  tokens a second, which is where published figures put it.
+- Queueing asserted to report saturation rather than a negative wait, and an unachievable latency
+  promise as impossible rather than as two billion replicas.
 - Regression tests for ten real bugs found during development: a repeat detector that called any
   coincidental word alignment a loop; a diagnostic that scored samples against an empty corpus; a
   warmup schedule that gave step zero a learning rate of exactly zero; a banned token that could
@@ -248,7 +265,9 @@ pnpm test
   vocabulary check that blamed the user for a newline it had inserted itself; a frame loop that
   detected a stalled page by `document.hidden` alone, so any run froze silently whenever the window
   was merely behind another one; and `predictNext` returning a field called `probs` that had always
-  held logits, which every existing caller happened to handle correctly and the first new one did not.
+  held logits, which every existing caller happened to handle correctly and the first new one did not;
+  and `replicasFor` turning an impossible latency promise into two billion machines because of a
+  guard against dividing by zero.
 
 ---
 

@@ -102,4 +102,13 @@ export const MODULES: ModuleDef[] = [
       'The step almost everyone skips. Write down what success means, build a held-out test set, find out what a lookup table already scores, commit to a bar, and only then look. Watch contamination inflate a score and watch a confidence interval refuse to let eight cases prove anything.',
     minutes: 30,
   },
+  {
+    path: '/deploy',
+    num: '11',
+    title: 'Deployment',
+    tagline: 'What it costs to keep a model answering',
+    blurb:
+      'Quantise your own weights and measure what the precision actually bought you. Watch a real key-value cache turn quadratic generation into linear. Then cost the whole thing against real hardware and find the point where the queue goes vertical.',
+    minutes: 30,
+  },
 ];

@@ -75,13 +75,29 @@ The real order of work at a company that ships models:
 | 7. Evaluate against the held-out set | yes — module 10, with baselines and confidence intervals |
 | 8. Post-training: supervised fine-tuning, then preference optimisation | partly — module 09 fine-tunes; no preference optimisation |
 | 9. Safety work: red-teaming, guardrails, classifiers | partly — modules 08 and 09 cover mechanisms, not the process |
-| 10. Deploy: serving, quantisation, latency and cost per request | no |
+| 10. Deploy: serving, quantisation, latency and cost per request | yes — module 11 |
 | 11. Monitor in production, collect feedback, decide when to retrain | no |
 
-The largest remaining gaps are now **10 and 11**: nothing covers serving a
-model, quantising it, or the cost and latency of a single request, and nothing
-covers watching it in production and deciding when to retrain. Stage 8 is half
-done, since module 09 fine-tunes but no module covers preference optimisation.
+One stage is left. **Stage 11**, watching a model in production, is the only
+part of the lifecycle the course does not touch: no drift detection, no
+feedback collection, no decision about when the world has moved far enough to
+justify training again. Stage 8 is half done, since module 09 fine-tunes but
+no module covers preference optimisation, and stage 3 still loads data without
+cleaning or deduplicating it.
+
+---
+
+## Notes from module 11
+
+Quantisation is applied for real, so the quality cost is genuine, but the
+engine computes in Float64 throughout and has no integer kernels. The speed
+benefit is therefore calculated from byte counts rather than observed, and the
+panel states this plainly. Adding real int8 kernels would make it measurable
+and is the obvious extension.
+
+The cost page offers published model shapes to cost against, because a
+53-thousand-parameter model costs nothing to serve and every figure rounded to
+zero. The arithmetic is identical at any size; only the shapes change.
 
 ---
 
